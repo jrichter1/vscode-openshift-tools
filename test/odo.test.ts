@@ -3,18 +3,9 @@
  *  Licensed under the MIT License. See LICENSE file in the project root for license information.
  *-----------------------------------------------------------------------------------------------*/
 
-//
-// Note: This example test is leveraging the Mocha test framework.
-// Please refer to their documentation on https://mochajs.org/ for help.
-//
-
-// The module 'assert' provides assertion methods from node
 import * as odo from '../src/odo';
-import { OpenShiftObject } from '../src/odo';
-import  { ICli, CliExitData, create } from '../src/cli';
+import  { ICli, CliExitData } from '../src/cli';
 import * as assert from 'assert';
-import { RSA_PKCS1_OAEP_PADDING } from 'constants';
-import { FunctionBreakpoint } from 'vscode';
 
 suite("odo integration tests", () => {
 
@@ -29,6 +20,26 @@ suite("odo integration tests", () => {
             }
         };
     }
+
+    suite('odo commands', () => {
+        test('odo-getVersion() returns version number with expected output', async () => {
+            const odoVersionCli: ICli = create([
+               'odo v0.0.13 (65b5bed8)',
+               'Unable to connect to OpenShift cluster, is it down?'
+            ].join('\n'));
+            const result: string = await odo.create(odoVersionCli).getOdoVersion();
+            assert(result === '0.0.13');
+        });
+
+        test('odo-getVersion() returns version 0.0.0 for unexpected output', async () => {
+            const odoVersionCli: ICli = create([
+               'odounexpected v0.0.13 (65b5bed8)',
+               'Unable to connect to OpenShift cluster, is it down?'
+            ].join('\n'));
+            const result: string = await odo.create(odoVersionCli).getOdoVersion();
+            assert(result === '0.0.0');
+        });
+    });
 
     suite("odo catalog integration", () => {
         const http = 'httpd';
