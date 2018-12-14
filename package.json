@@ -509,7 +509,8 @@
     "test": "npm run clean && npm run compile && node ./node_modules/vscode/bin/test",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && tslint -p tslint.json && npm run compile"
+    "build": "npm run clean && tslint -p tslint.json && npm run compile",
+    "ui-test": "npm run clean && vsce package && node out/ui-test/launcher.js"
   },
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -521,6 +522,7 @@
     "@types/node": "^10.12.18",
     "@types/opn": "^5.1.0",
     "@types/request": "^2.48.1",
+    "@types/selenium-webdriver": "^3.0.14",
     "@types/shelljs": "^0.8.1",
     "@types/sinon": "^5.0.7",
     "@types/sinon-chai": "^3.2.1",
@@ -535,6 +537,7 @@
     "mocha-jenkins-reporter": "^0.4.1",
     "proxyquire": "^2.1.0",
     "remap-istanbul": "^0.12.0",
+    "selenium-webdriver": "^3.0.0",
     "sinon": "^7.2.2",
     "sinon-chai": "^3.3.0",
     "tslint": "^5.12.1",

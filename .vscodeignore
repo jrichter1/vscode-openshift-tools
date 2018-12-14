@@ -2,6 +2,7 @@
 .vscode-test/**
 images/vscode-openshift-tools.gif
 out/test/**
+out/ui-test/**
 out/**/*.map
 src/**
 .gitignore
@@ -10,9 +11,11 @@ vsc-extension-quickstart.md
 tslint.json
 *.vsix
 test/**
+ui-test/**
 coverage/**
 coverconfig.json
 Jenkinsfile
 .gitattributes
 .travis.yml
 CONTRIBUTING.md
+test-resources/**
