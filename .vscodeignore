@@ -16,3 +16,4 @@ Jenkinsfile
 .gitattributes
 .travis.yml
 CONTRIBUTING.md
+test-resources

@@ -640,7 +640,8 @@
     "test": "npm run clean && npm run compile && node ./node_modules/vscode/bin/test",
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
-    "build": "npm run clean && tslint -p tslint.json && npm run compile"
+    "build": "npm run clean && tslint -p tslint.json && npm run compile",
+    "ui-test": "npm run clean && npm run compile && extest setup-and-run out/ui-test/suite.js"
   },
   "devDependencies": {
     "@types/byline": "^4.2.31",
@@ -673,6 +674,7 @@
     "tslint": "^5.16.0",
     "typescript": "^3.4.5",
     "vscode": "^1.1.33",
+    "vscode-extension-tester": "^1.1.6",
     "walker": "^1.0.7"
   },
   "dependencies": {
