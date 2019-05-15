@@ -3,7 +3,8 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as chai from 'chai';
 import { Platform } from '../src/util/platform';
-import * as login from './login';
+import * as login from './suite/login';
+import * as project from './suite/project';
 const expect = chai.expect;
 
 describe('System tests', () => {
@@ -52,4 +53,5 @@ describe('System tests', () => {
     });
 
     login.loginTest(clusterUrl);
+    project.projectTest(clusterUrl);
 });
