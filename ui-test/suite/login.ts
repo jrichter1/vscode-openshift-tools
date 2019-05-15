@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { execSync } from 'child_process';
 import { Platform } from "../../src/util/platform";
 import * as path from 'path';
-import { viewHasNoProgress, notificationsExist } from "../common/conditions";
+import { viewHasNoProgress, notificationExists } from "../common/conditions";
 import { findNotification, setInputTextAndConfirm } from "../common/util";
 
 export function loginTest(clusterUrl: string) {
@@ -25,11 +25,11 @@ export function loginTest(clusterUrl: string) {
             await (await view.getTitlePart().getActionButton('Log in to cluster')).click();
 
             // download ODO
-            const odoNotification = await findNotification('Cannot find OpenShift Do');
+            const odoNotification = await driver.wait(() => { return notificationExists('Cannot find OpenShift Do'); }, 2000);
             await clickDownload(odoNotification);
 
             // download OKD
-            const okdNotification = await findNotification('Cannot find OKD');
+            const okdNotification = await driver.wait(() => { return notificationExists('Cannot find OKD'); }, 2000);
             await clickDownload(okdNotification);
 
             await driver.wait(until.elementLocated(By.className('quick-input-widget')), 10000);
@@ -72,7 +72,7 @@ export function loginTest(clusterUrl: string) {
             await (await view.getTitlePart().getActionButton('Log in to cluster')).click();
             await confirmLogout(driver);
 
-            const input = new InputBox();
+            const input = await new InputBox().wait();
             await input.selectQuickPick('Token');
             await input.getDriver().sleep(500);
             await setInputTextAndConfirm(input, clusterUrl);
@@ -104,8 +104,7 @@ export function loginTest(clusterUrl: string) {
 }
 
 async function confirmLogout(driver: WebDriver) {
-    await driver.wait(() => { return notificationsExist(); }, 5000);
-    const loginNotification = await findNotification('You are already logged in');
+    const loginNotification = await driver.wait(() => { return notificationExists('You are already logged in'); }, 5000);
     await loginNotification.takeAction('Yes');
 }
 

@@ -1,35 +1,83 @@
-import { ViewSection, ViewItem, InputBox, SideBarView } from "vscode-extension-tester";
-import { setInputTextAndConfirm } from "../common/util";
-import { notificationsExist } from "../common/conditions";
+import { ViewSection, ViewItem, InputBox, SideBarView, Workbench, WebDriver, VSBrowser } from "vscode-extension-tester";
+import { setInputTextAndConfirm, findNotification } from "../common/util";
+import { notificationsExist, notificationExists } from "../common/conditions";
 import { expect } from 'chai';
 
 export function projectTest(clusterUrl: string) {
     describe('OpenShift Project', () => {
+        let driver: WebDriver;
         let explorer: ViewSection;
         let clusterNode: ViewItem;
 
+        const projectName = 'test-project';
+        const projectName1 = 'test-project1';
+
         before(async () => {
+            driver = VSBrowser.instance.driver;
             explorer = (await new SideBarView().getContent().getSections())[0];
             clusterNode = await explorer.findItem(clusterUrl);
         });
 
         it('New project can be created from cluster node', async function() {
             this.timeout(10000);
-            const projectName = 'test-project';
             const menu = await clusterNode.openContextMenu();
             await menu.select('New Project');
 
-            const input = new InputBox();
-            setInputTextAndConfirm(input, projectName);
+            await handleNewProject(projectName, clusterNode, driver);
+        });
 
-            await explorer.getDriver().wait(() => { return notificationsExist(); });
-            await clusterNode.collapse();
-            const labels = [];
-            for (const item of await clusterNode.select()) {
-                labels.push(item.getLabel());
-            }
+        it('New project can be created from command palette', async function() {
+            this.timeout(10000);
+            await new Workbench().executeCommand('openshift new project');
 
-            expect(labels).contains(projectName);
+            await handleNewProject(projectName1, clusterNode, driver);
+        });
+
+        it('Project can be deleted via context menu', async function() {
+            this.timeout(30000);
+            const project = (await clusterNode.getChildren()).find((value) => {
+                return value.getLabel() === projectName;
+            });
+            await project.openContextMenu().then((menu) => { menu.select('Delete'); });
+            await handleDeleteProject(projectName, clusterNode, driver);
+        });
+
+        it('Project can be deleted via command palette', async function() {
+            this.timeout(30000);
+            await new Workbench().executeCommand('openshift delete project');
+            const input = await new InputBox().wait();
+            await input.selectQuickPick(projectName1);
+            await handleDeleteProject(projectName1, clusterNode, driver);
         });
     });
+}
+
+async function handleNewProject(projectName: string,  clusterNode: ViewItem, driver: WebDriver) {
+    const input = await new InputBox().wait();
+    expect(await input.getMessage()).has.string('Provide Project name');
+    setInputTextAndConfirm(input, projectName);
+
+    await driver.wait(() => { return notificationsExist(); }, 5000);
+    const labels = [];
+    await driver.sleep(2000);
+    for (const item of await clusterNode.getChildren()) {
+        labels.push(item.getLabel());
+    }
+
+    expect(labels).contains(projectName);
+}
+
+async function handleDeleteProject(projectName: string, clusterNode: ViewItem, driver: WebDriver) {
+    const notification = await driver.wait(() => { return notificationExists('Do you want to delete Project'); }, 20000);
+    await notification.takeAction('Yes');
+    await findNotification('Deleting Project');
+    await driver.wait(() => { return notificationExists(`Project '${projectName}' successfully deleted`); }, 20000);
+
+    const labels = [];
+    await driver.sleep(1000);
+    for (const item of await clusterNode.getChildren()) {
+        labels.push(item.getLabel());
+    }
+
+    expect(labels).not.to.contain(projectName);
 }

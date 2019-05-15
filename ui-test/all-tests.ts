@@ -5,6 +5,7 @@ import * as chai from 'chai';
 import { Platform } from '../src/util/platform';
 import * as login from './suite/login';
 import * as project from './suite/project';
+import * as cluster from './suite/cluster';
 const expect = chai.expect;
 
 describe('System tests', () => {
@@ -53,5 +54,6 @@ describe('System tests', () => {
     });
 
     login.loginTest(clusterUrl);
+    cluster.clusterTest(clusterUrl);
     project.projectTest(clusterUrl);
 });

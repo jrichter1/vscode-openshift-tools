@@ -641,7 +641,7 @@
     "update-deps": "node_modules/.bin/ncu --upgrade --loglevel verbose --packageFile package.json && npm update",
     "coverage:upload": "codecov -f coverage/coverage-final.json",
     "build": "npm run clean && tslint -p tslint.json && npm run compile",
-    "ui-test": "npm run clean && npm run compile && extest setup-and-run out/ui-test/suite.js"
+    "ui-test": "npm run clean && npm run compile && extest setup-and-run out/ui-test/all-tests.js"
   },
   "devDependencies": {
     "@types/byline": "^4.2.31",
@@ -696,6 +696,10 @@
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
     "validator": "^10.11.0",
+<<<<<<< HEAD
     "vscode-kubernetes-tools-api": "0.0.7"
+=======
+    "vscode-extension-tester": "file:../vscode-extension-tester"
+>>>>>>> Cluster tests ans stuff
   }
 }
