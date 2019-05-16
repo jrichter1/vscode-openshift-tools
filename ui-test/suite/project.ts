@@ -1,6 +1,6 @@
 import { ViewSection, ViewItem, InputBox, SideBarView, Workbench, WebDriver, VSBrowser } from "vscode-extension-tester";
 import { setInputTextAndConfirm, findNotification } from "../common/util";
-import { notificationsExist, notificationExists } from "../common/conditions";
+import { notificationExists, inputHasError, nodeHasNewChildren } from "../common/conditions";
 import { expect } from 'chai';
 
 export function projectTest(clusterUrl: string) {
@@ -49,6 +49,21 @@ export function projectTest(clusterUrl: string) {
             await input.selectQuickPick(projectName1);
             await handleDeleteProject(projectName1, clusterNode, driver);
         });
+
+        it('Project name is being validated', async function() {
+            this.timeout(15000);
+            const invalidName = 'Not a valid Project name';
+            const invalidLength = 'Project name should be between 2-63 characters';
+            await new Workbench().executeCommand('openshift new project');
+
+            const input = await new InputBox().wait();
+            await setTextAndCheck(input, '1project', invalidName);
+            await setTextAndCheck(input, 'Project', invalidName);
+            await setTextAndCheck(input, '-$@project', invalidName);
+            await setTextAndCheck(input, 'p', invalidLength);
+            await setTextAndCheck(input, 'this-project-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
+            await input.cancel();
+        });
     });
 }
 
@@ -57,9 +72,8 @@ async function handleNewProject(projectName: string,  clusterNode: ViewItem, dri
     expect(await input.getMessage()).has.string('Provide Project name');
     setInputTextAndConfirm(input, projectName);
 
-    await driver.wait(() => { return notificationsExist(); }, 5000);
+    await driver.wait(() => { return nodeHasNewChildren(clusterNode); }, 15000);
     const labels = [];
-    await driver.sleep(2000);
     for (const item of await clusterNode.getChildren()) {
         labels.push(item.getLabel());
     }
@@ -71,13 +85,21 @@ async function handleDeleteProject(projectName: string, clusterNode: ViewItem, d
     const notification = await driver.wait(() => { return notificationExists('Do you want to delete Project'); }, 20000);
     await notification.takeAction('Yes');
     await findNotification('Deleting Project');
-    await driver.wait(() => { return notificationExists(`Project '${projectName}' successfully deleted`); }, 20000);
+    await driver.wait(() => { return nodeHasNewChildren(clusterNode); }, 20000);
 
     const labels = [];
-    await driver.sleep(1000);
     for (const item of await clusterNode.getChildren()) {
         labels.push(item.getLabel());
     }
 
     expect(labels).not.to.contain(projectName);
+}
+
+async function setTextAndCheck(input: InputBox, text: string, error: string) {
+    await input.setText(text);
+    const message = await input.getDriver().wait(() => { return inputHasError(input); }, 2000);
+
+    expect(message).has.string(error);
+    await input.setText('valid-project');
+    await input.getDriver().sleep(500);
 }

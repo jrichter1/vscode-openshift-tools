@@ -17,7 +17,7 @@ export function clusterTest(clusterUrl: string) {
         it('List Catalog Components works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
-            await menu.select('List Catalog Components ');
+            await menu.select('List Catalog Components');
             await checkTerminalText('odo catalog list components', driver);
         });
 
