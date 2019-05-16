@@ -674,7 +674,7 @@
     "tslint": "^5.16.0",
     "typescript": "^3.4.5",
     "vscode": "^1.1.33",
-    "vscode-extension-tester": "^1.1.6",
+    "vscode-extension-tester": "file:../vscode-extension-tester",
     "walker": "^1.0.7"
   },
   "dependencies": {
@@ -696,10 +696,6 @@
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
     "validator": "^10.11.0",
-<<<<<<< HEAD
     "vscode-kubernetes-tools-api": "0.0.7"
-=======
-    "vscode-extension-tester": "file:../vscode-extension-tester"
->>>>>>> Cluster tests ans stuff
   }
 }
