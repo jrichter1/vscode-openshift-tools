@@ -695,6 +695,7 @@
     "targz": "^1.0.1",
     "unzip-stream": "^0.3.0",
     "validator": "^10.11.0",
+    "vscode-extension-tester": "file:../vscode-extension-tester",
     "vscode-kubernetes-tools-api": "0.0.7"
   }
 }

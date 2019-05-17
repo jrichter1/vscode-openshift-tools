@@ -1,4 +1,4 @@
-import { SideBarView, ActivityBar, Workbench, Notification, WebDriver, VSBrowser, InputBox, until, By } from "vscode-extension-tester";
+import { SideBarView, ActivityBar, Workbench, Notification, WebDriver, VSBrowser, InputBox, until, By, ViewSection } from "vscode-extension-tester";
 import { expect } from 'chai';
 import { execSync } from 'child_process';
 import { Platform } from "../../src/util/platform";
@@ -14,15 +14,18 @@ export function loginTest(clusterUrl: string) {
     describe('Login', () => {
         let view: SideBarView;
         let driver: WebDriver;
+        let explorer: ViewSection;
 
         before(async () => {
             driver = VSBrowser.instance.driver;
             view = await new ActivityBar().getViewControl('OpenShift').openView();
+            explorer = await view.getContent().getSection('openshift application explorer');
         });
 
         it('First ever credentials login works', async function () {
             this.timeout(120000);
-            await (await view.getTitlePart().getActionButton('Log in to cluster')).click();
+            await driver.actions().mouseMove(explorer).perform();
+            await explorer.getAction('Log in to cluster').click();
 
             // download ODO
             const odoNotification = await driver.wait(() => { return notificationExists('Cannot find OpenShift Do'); }, 2000);
@@ -45,20 +48,21 @@ export function loginTest(clusterUrl: string) {
             }
 
             // Check that the cluster node is present in the tree view
-            const item = await (await view.getContent().getSections())[0].findItem(clusterUrl);
+            const item = await explorer.findItem(clusterUrl);
             expect(item).not.undefined;
         });
 
         it('Relogging in to the cluster works with saved credentials', async function() {
             this.timeout(120000);
-            await (await view.getTitlePart().getActionButton('Log in to cluster')).click();
+            await driver.actions().mouseMove(explorer).perform();
+            await explorer.getAction('Log in to cluster').click();
             await confirmLogout(driver);
 
             await credentialsLogin(clusterUrl);
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
             // Check that the cluster node is present in the tree view
-            const items = await (await view.getContent().getSections())[0].getVisibleItems();
+            const items = await explorer.getVisibleItems();
             expect(await items[0].getLabel()).equals(clusterUrl);
         });
 
@@ -69,7 +73,8 @@ export function loginTest(clusterUrl: string) {
                 const output = execSync(`${path.resolve(Platform.getUserHomePath(), '.vs-openshift', 'oc')} whoami -t`);
                 userToken = output.toString().trim();
             }
-            await (await view.getTitlePart().getActionButton('Log in to cluster')).click();
+            await driver.actions().mouseMove(explorer).perform();
+            await explorer.getAction('Log in to cluster').click();
             await confirmLogout(driver);
 
             const input = await new InputBox().wait();
@@ -81,7 +86,7 @@ export function loginTest(clusterUrl: string) {
             await setInputTextAndConfirm(input, userToken);
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
-            const item = await (await view.getContent().getSections())[0].findItem(clusterUrl);
+            const item = await explorer.findItem(clusterUrl);
             expect(item).not.undefined;
         });
 

@@ -14,7 +14,7 @@ export function projectTest(clusterUrl: string) {
 
         before(async () => {
             driver = VSBrowser.instance.driver;
-            explorer = (await new SideBarView().getContent().getSections())[0];
+            explorer = await new SideBarView().getContent().getSection('openshift application explorer');
             clusterNode = await explorer.findItem(clusterUrl);
         });
 
@@ -35,9 +35,7 @@ export function projectTest(clusterUrl: string) {
 
         it('Project can be deleted via context menu', async function() {
             this.timeout(30000);
-            const project = (await clusterNode.getChildren()).find((value) => {
-                return value.getLabel() === projectName;
-            });
+            const project = await clusterNode.findChildItem(projectName);
             await project.openContextMenu().then((menu) => { menu.select('Delete'); });
             await handleDeleteProject(projectName, clusterNode, driver);
         });

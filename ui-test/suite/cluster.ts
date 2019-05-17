@@ -1,6 +1,5 @@
-import { ViewItem, VSBrowser, WebDriver, SideBarView, ViewSection, TerminalView, Workbench, OutputView, until, By } from "vscode-extension-tester";
+import { ViewItem, VSBrowser, WebDriver, SideBarView, ViewSection, Workbench, OutputView, until, By } from "vscode-extension-tester";
 import { expect } from 'chai';
-import { terminalHasNoChanges } from "../common/conditions";
 import { checkTerminalText } from "../common/util";
 
 export function clusterTest(clusterUrl: string) {
@@ -11,7 +10,7 @@ export function clusterTest(clusterUrl: string) {
 
         before(async () => {
             driver = VSBrowser.instance.driver;
-            explorer = (await new SideBarView().getContent().getSections())[0];
+            explorer = await new SideBarView().getContent().getSection('openshift application explorer');
             clusterNode = await explorer.findItem(clusterUrl);
         });
 

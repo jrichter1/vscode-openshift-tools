@@ -41,16 +41,17 @@ describe('System tests', () => {
         const view = await new ActivityBar().getViewControl('OpenShift').openView();
         const title = await view.getTitlePart().getTitle();
 
-        expect(title.toLowerCase()).equals('openshift: openshift application explorer');
+        expect(title.toLowerCase()).equals('openshift');
     });
 
     it('Login and Refresh buttons are available', async () => {
         await new ActivityBar().getViewControl('OpenShift').openView();
-        const buttons = await new SideBarView().getTitlePart().getActionButtons();
+        const section = await new SideBarView().getContent().getSection('openshift application explorer');
+        const buttons = await section.getActions();
 
         expect(buttons.length).equals(2);
-        expect(buttons[0].getTitle()).equals('Log in to cluster');
-        expect(buttons[1].getTitle()).equals('Refresh View');
+        expect(buttons[0].getLabel()).equals('Log in to cluster');
+        expect(buttons[1].getLabel()).equals('Refresh View');
     });
 
     login.loginTest(clusterUrl);
