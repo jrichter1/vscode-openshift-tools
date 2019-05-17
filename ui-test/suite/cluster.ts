@@ -1,6 +1,7 @@
 import { ViewItem, VSBrowser, WebDriver, SideBarView, ViewSection, TerminalView, Workbench, OutputView, until, By } from "vscode-extension-tester";
 import { expect } from 'chai';
 import { terminalHasNoChanges } from "../common/conditions";
+import { checkTerminalText } from "../common/util";
 
 export function clusterTest(clusterUrl: string) {
     describe('OpenShift Cluster Node', () => {
@@ -89,11 +90,4 @@ export function clusterTest(clusterUrl: string) {
             expect(await commands[0].getText()).equals('OpenShift: Open Console for Current Cluster');
         });
     });
-}
-
-async function checkTerminalText(expectedText: string, driver: WebDriver) {
-    await driver.wait(until.elementLocated(By.id('workbench.panel.terminal')));
-    const terminalView = await new TerminalView().wait();
-    const text = await driver.wait(() => { return terminalHasNoChanges(terminalView, 1000); }, 5000);
-    expect(text).has.string(expectedText);
 }

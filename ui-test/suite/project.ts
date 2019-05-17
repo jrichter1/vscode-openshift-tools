@@ -1,6 +1,6 @@
 import { ViewSection, ViewItem, InputBox, SideBarView, Workbench, WebDriver, VSBrowser } from "vscode-extension-tester";
-import { setInputTextAndConfirm, findNotification } from "../common/util";
-import { notificationExists, inputHasError, nodeHasNewChildren } from "../common/conditions";
+import { setInputTextAndConfirm, findNotification, setTextAndCheck } from "../common/util";
+import { notificationExists, nodeHasNewChildren } from "../common/conditions";
 import { expect } from 'chai';
 
 export function projectTest(clusterUrl: string) {
@@ -93,13 +93,4 @@ async function handleDeleteProject(projectName: string, clusterNode: ViewItem, d
     }
 
     expect(labels).not.to.contain(projectName);
-}
-
-async function setTextAndCheck(input: InputBox, text: string, error: string) {
-    await input.setText(text);
-    const message = await input.getDriver().wait(() => { return inputHasError(input); }, 2000);
-
-    expect(message).has.string(error);
-    await input.setText('valid-project');
-    await input.getDriver().sleep(500);
 }

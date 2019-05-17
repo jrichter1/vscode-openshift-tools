@@ -85,7 +85,8 @@ export function loginTest(clusterUrl: string) {
             expect(item).not.undefined;
         });
 
-        it('Login commands are available', async () => {
+        it('Login commands are available', async function() {
+            this.timeout(5000);
             const prompt = await new Workbench().openCommandPrompt();
 
             await prompt.setText('>openshift log');

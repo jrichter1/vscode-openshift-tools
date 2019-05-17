@@ -1,12 +1,12 @@
 import { ActivityBar, ViewControl, SideBarView } from 'vscode-extension-tester';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as chai from 'chai';
+import { expect } from 'chai';
 import { Platform } from '../src/util/platform';
 import * as login from './suite/login';
 import * as project from './suite/project';
 import * as cluster from './suite/cluster';
-const expect = chai.expect;
+import * as application from './suite/application';
 
 describe('System tests', () => {
     const clusterUrl = process.env.OPENSHIFT_CLUSTER_URL;
@@ -56,4 +56,5 @@ describe('System tests', () => {
     login.loginTest(clusterUrl);
     cluster.clusterTest(clusterUrl);
     project.projectTest(clusterUrl);
+    application.applicationTest(clusterUrl);
 });
