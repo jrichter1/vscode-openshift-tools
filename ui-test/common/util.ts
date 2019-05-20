@@ -46,6 +46,17 @@ export async function deleteProject(name: string, cluster: ViewItem, driver: Web
     await driver.wait(() => { return nodeHasNewChildren(cluster); }, 15000);
 }
 
+export async function createApplication(name: string, projectName: string, cluster: ViewItem, driver: WebDriver) {
+    await new Workbench().executeCommand('openshift new application');
+    const input = await new InputBox().wait();
+    await input.selectQuickPick(projectName);
+    await driver.sleep(500);
+    await input.setText(name);
+    await input.confirm();
+    const project = await cluster.findChildItem(projectName);
+    await driver.wait(() => { return nodeHasNewChildren(project); }, 5000);
+}
+
 export async function checkTerminalText(expectedText: string, driver: WebDriver, timeout: number = 5000) {
     await driver.wait(until.elementLocated(By.id('workbench.panel.terminal')));
     const terminalView = await new TerminalView().wait();

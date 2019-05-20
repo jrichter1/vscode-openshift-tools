@@ -134,6 +134,7 @@ async function credentialsLogin(url: string, user?: string, password?: string) {
 
     // input password
     expect(await input.getMessage()).has.string('Provide Password for basic authentication');
+    expect(await input.isPassword()).to.be.true;
     await setInputTextAndConfirm(input, password);
 }
 
