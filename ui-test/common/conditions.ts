@@ -1,4 +1,6 @@
-import { Workbench, NotificationType, SideBarView, TerminalView, InputBox, ViewItem } from "vscode-extension-tester";
+import { Workbench, NotificationType, SideBarView, TerminalView, InputBox, ViewItem, ViewSection, Input } from "vscode-extension-tester";
+
+export const NAME_EXISTS = `This name is already used, please enter different name.`;
 
 export async function notificationExists(message: string) {
     try {
@@ -39,9 +41,11 @@ export async function inputHasError(input: InputBox) {
     return null;
 }
 
-export async function nodeHasNewChildren(node: ViewItem) {
+export async function nodeHasNewChildren(node: ViewItem, startChildren?: ViewItem[]) {
     try {
-        const startChildren = await node.getChildren();
+        if (!startChildren) {
+            startChildren = await node.getChildren();
+        }
         await node.getDriver().sleep(1000);
         const endChildren = await node.getChildren();
         if (startChildren.length === endChildren.length) {
@@ -49,6 +53,23 @@ export async function nodeHasNewChildren(node: ViewItem) {
         }
         return endChildren;
     } catch (err) {
+        await node.getDriver().sleep(500);
         return await node.getChildren();
     }
+}
+
+export async function inputHasQuickPicks(input: Input) {
+    const picks = await input.getQuickPicks();
+    if (picks.length > 0) {
+        return picks;
+    }
+    return null;
+}
+
+export async function viewHasItems(view: ViewSection) {
+    const items = await view.getVisibleItems();
+    if (items.length > 0) {
+        return items;
+    }
+    return null;
 }

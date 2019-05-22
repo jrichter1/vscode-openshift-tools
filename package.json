@@ -170,7 +170,7 @@
       },
       {
         "command": "openshift.component.create.binary",
-        "title": "New Component form binary",
+        "title": "New Component from binary",
         "category": "OpenShift"
       },
       {

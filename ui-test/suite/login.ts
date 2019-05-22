@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { execSync } from 'child_process';
 import { Platform } from "../../src/util/platform";
 import * as path from 'path';
-import { viewHasNoProgress, notificationExists } from "../common/conditions";
+import { viewHasNoProgress, notificationExists, viewHasItems } from "../common/conditions";
 import { findNotification, setInputTextAndConfirm } from "../common/util";
 
 export function loginTest(clusterUrl: string) {
@@ -48,6 +48,7 @@ export function loginTest(clusterUrl: string) {
             }
 
             // Check that the cluster node is present in the tree view
+            await driver.wait(() => { return viewHasItems(explorer); }, 5000);
             const item = await explorer.findItem(clusterUrl);
             expect(item).not.undefined;
         });
@@ -62,7 +63,7 @@ export function loginTest(clusterUrl: string) {
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
             // Check that the cluster node is present in the tree view
-            const items = await explorer.getVisibleItems();
+            const items = await driver.wait(() => { return viewHasItems(explorer); }, 5000);
             expect(await items[0].getLabel()).equals(clusterUrl);
         });
 
@@ -83,9 +84,11 @@ export function loginTest(clusterUrl: string) {
             await setInputTextAndConfirm(input, clusterUrl);
 
             expect(await input.getMessage()).has.string('Provide Bearer token');
+            expect(await input.isPassword()).to.be.true;
             await setInputTextAndConfirm(input, userToken);
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
+            await driver.wait(() => { return viewHasItems(explorer); }, 5000);
             const item = await explorer.findItem(clusterUrl);
             expect(item).not.undefined;
         });

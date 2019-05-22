@@ -1,4 +1,4 @@
-import { ViewItem, VSBrowser, WebDriver, SideBarView, ViewSection, Workbench, OutputView, until, By } from "vscode-extension-tester";
+import { ViewItem, VSBrowser, WebDriver, ViewSection, Workbench, OutputView, until, By, ActivityBar } from "vscode-extension-tester";
 import { expect } from 'chai';
 import { checkTerminalText } from "../common/util";
 
@@ -10,7 +10,8 @@ export function clusterTest(clusterUrl: string) {
 
         before(async () => {
             driver = VSBrowser.instance.driver;
-            explorer = await new SideBarView().getContent().getSection('openshift application explorer');
+            const view = await new ActivityBar().getViewControl('OpenShift').openView();
+            explorer = await view.getContent().getSection('openshift application explorer');
             clusterNode = await explorer.findItem(clusterUrl);
         });
 
@@ -49,7 +50,9 @@ export function clusterTest(clusterUrl: string) {
 
         it('Show Output Channel works from command palette', async function() {
             this.timeout(10000);
-            await new Workbench().executeCommand('openshift show output');
+            const workbench = await new Workbench();
+            await workbench.executeCommand('openshift show output');
+            await (await workbench.openNotificationsCenter()).clearAllNotifications();
 
             await driver.wait(until.elementLocated(By.id('workbench.panel.output')));
             const outputView = await new OutputView().wait();
@@ -66,6 +69,7 @@ export function clusterTest(clusterUrl: string) {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('Show Output Channel');
+            await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
 
             await driver.wait(until.elementLocated(By.id('workbench.panel.output')));
             const outputView = await new OutputView().wait();
