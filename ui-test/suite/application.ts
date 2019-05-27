@@ -56,7 +56,7 @@ export function applicationTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new application');
             await quickPick(projectName1, driver);
 
-            const input = await new InputBox().wait();
+            const input = await new InputBox().wait(3000);
             await setTextAndCheck(input, appName1, NAME_EXISTS);
             await input.cancel();
         });
@@ -105,7 +105,7 @@ export function applicationTest(clusterUrl: string) {
             new Workbench().executeCommand('openshift new application');
             await quickPick(projectName, driver);
 
-            const input = await new InputBox().wait();
+            const input = await new InputBox().wait(3000);
             await setTextAndCheck(input, '1app', invalidName);
             await setTextAndCheck(input, 'a@p#p%', invalidName);
             await setTextAndCheck(input, 'App', invalidName);
@@ -117,7 +117,7 @@ export function applicationTest(clusterUrl: string) {
 }
 
 async function verifyAppCreation(appName: string, project: ViewItem, driver: WebDriver) {
-    const input = await new InputBox().wait();
+    const input = await new InputBox().wait(3000);
     expect(await input.getMessage()).has.string('Provide Application name');
     await input.setText(appName);
     await input.confirm();

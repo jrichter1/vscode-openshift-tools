@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { execSync } from 'child_process';
 import { Platform } from "../../src/util/platform";
 import * as path from 'path';
-import { viewHasNoProgress, notificationExists, viewHasItems } from "../common/conditions";
+import { viewHasNoProgress, notificationExists, viewHasItems, whileNotificationExists } from "../common/conditions";
 import { findNotification, setInputTextAndConfirm } from "../common/util";
 
 export function loginTest(clusterUrl: string) {
@@ -23,12 +23,14 @@ export function loginTest(clusterUrl: string) {
         });
 
         it('First ever credentials login works', async function () {
-            this.timeout(120000);
+            this.timeout(150000);
+            await driver.wait(() => { return notificationExists('Cannot find OpenShift Do'); }, 15000);
+
             await driver.actions().mouseMove(explorer).perform();
             await explorer.getAction('Log in to cluster').click();
 
             // download ODO
-            const odoNotification = await driver.wait(() => { return notificationExists('Cannot find OpenShift Do'); }, 2000);
+            const odoNotification = await driver.wait(() => { return notificationExists('Cannot find OpenShift Do'); }, 15000);
             await clickDownload(odoNotification);
 
             // download OKD
@@ -78,7 +80,7 @@ export function loginTest(clusterUrl: string) {
             await explorer.getAction('Log in to cluster').click();
             await confirmLogout(driver);
 
-            const input = await new InputBox().wait();
+            const input = await new InputBox().wait(3000);
             await input.selectQuickPick('Token');
             await input.getDriver().sleep(500);
             await setInputTextAndConfirm(input, clusterUrl);

@@ -8,6 +8,7 @@ import * as project from './suite/project';
 import * as cluster from './suite/cluster';
 import * as application from './suite/application';
 import * as component from './suite/component';
+import * as service from './suite/service';
 
 describe('System tests', () => {
     const clusterUrl = process.env.OPENSHIFT_CLUSTER_URL;
@@ -62,7 +63,8 @@ describe('System tests', () => {
     cluster.clusterTest(clusterUrl);
     project.projectTest(clusterUrl);
     application.applicationTest(clusterUrl);
-    component.componentTest(clusterUrl);
+    // component.componentTest(clusterUrl);
+    // service.serviceTest(clusterUrl);
 });
 
 async function openFolder(path: string) {

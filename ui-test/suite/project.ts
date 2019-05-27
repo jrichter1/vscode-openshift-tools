@@ -20,7 +20,7 @@ export function projectTest(clusterUrl: string) {
         });
 
         it('New project can be created from cluster node', async function() {
-            this.timeout(10000);
+            this.timeout(20000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('New Project');
 
@@ -30,7 +30,7 @@ export function projectTest(clusterUrl: string) {
         });
 
         it('New project can be created from command palette', async function() {
-            this.timeout(10000);
+            this.timeout(20000);
             await new Workbench().executeCommand('openshift new project');
 
             await handleNewProject(projectName1, clusterNode, driver);
@@ -42,7 +42,7 @@ export function projectTest(clusterUrl: string) {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift new project');
 
-            const input = await new InputBox().wait();
+            const input = await new InputBox().wait(3000);
             await setTextAndCheck(input, projectName, NAME_EXISTS);
             await input.cancel();
         });
@@ -57,7 +57,7 @@ export function projectTest(clusterUrl: string) {
         it('Project can be deleted via command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift delete project');
-            const input = await new InputBox().wait();
+            const input = await new InputBox().wait(3000);
             await input.selectQuickPick(projectName1);
             await verifyNodeDeletion(projectName1, clusterNode, 'Project', driver, 20000);
         });
@@ -68,7 +68,7 @@ export function projectTest(clusterUrl: string) {
             const invalidLength = 'Project name should be between 2-63 characters';
             await new Workbench().executeCommand('openshift new project');
 
-            const input = await new InputBox().wait();
+            const input = await new InputBox().wait(3000);
             await setTextAndCheck(input, '1project', invalidName);
             await setTextAndCheck(input, 'Project', invalidName);
             await setTextAndCheck(input, '-$@project', invalidName);
@@ -80,7 +80,7 @@ export function projectTest(clusterUrl: string) {
 }
 
 async function handleNewProject(projectName: string,  clusterNode: ViewItem, driver: WebDriver) {
-    const input = await new InputBox().wait();
+    const input = await new InputBox().wait(3000);
     expect(await input.getMessage()).has.string('Provide Project name');
     setInputTextAndConfirm(input, projectName);
 

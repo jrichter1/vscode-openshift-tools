@@ -19,6 +19,10 @@ export async function notificationExists(message: string) {
     }
 }
 
+export async function whileNotificationExists(message: string) {
+    return !(await notificationExists(message));
+}
+
 export async function viewHasNoProgress(view: SideBarView) {
     const content = view.getContent();
     return !await content.hasProgress();
@@ -64,6 +68,18 @@ export async function inputHasQuickPicks(input: Input) {
         return picks;
     }
     return null;
+}
+
+export async function inputHasNewMessage(input: InputBox, message: string, placeholder?: string) {
+    const currentMessage = await input.getMessage();
+    if (currentMessage !== message) {
+        return true;
+    }
+    if (placeholder) {
+        const currentHolder = await input.getPlaceHolder();
+        return placeholder !== currentHolder;
+    }
+    return false;
 }
 
 export async function viewHasItems(view: ViewSection) {

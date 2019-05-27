@@ -1,5 +1,5 @@
 import { ViewItem, ViewSection, WebDriver, VSBrowser, InputBox, Workbench, DialogHandler, ActivityBar } from "vscode-extension-tester";
-import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setTextAndCheck, checkTerminalText, verifyNodeDeletion } from "../common/util";
+import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setTextAndCheck, checkTerminalText, verifyNodeDeletion, selectApplication } from "../common/util";
 import { nodeHasNewChildren, notificationExists, inputHasQuickPicks, NAME_EXISTS } from "../common/conditions";
 import * as path from 'path';
 import { Archive } from '../../src/util/archive';
@@ -81,8 +81,6 @@ export function componentTest(clusterUrl: string) {
             this.timeout(60000);
             const initItems = await application.getChildren();
             await new Workbench().executeCommand('openshift new component from local folder');
-            const project = await clusterNode.findChildItem(projectName);
-            application = await project.findChildItem(appName);
 
             const input = await new InputBox().wait();
             await selectApplication(input, projectName, appName);
@@ -305,12 +303,6 @@ export function componentTest(clusterUrl: string) {
             await verifyNodeDeletion(localComponentName, application, 'Component', driver, 30000);
         });
     });
-}
-
-async function selectApplication(input: InputBox, projectName: string, appName: string) {
-    const driver = input.getDriver();
-    await quickPick(projectName, driver);
-    await quickPick(appName, driver);
 }
 
 async function createComponent(input: InputBox, name: string, type: string, typeVersion: string = 'latest') {
