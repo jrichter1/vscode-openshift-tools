@@ -6,7 +6,6 @@ import { nodeHasNewChildren } from "../common/conditions";
 export function serviceTest(clusterUrl: string) {
     describe('OpenShift Service', () => {
         let clusterNode: ViewItem;
-        let driver: WebDriver;
         let application: ViewItem;
         let component: ViewItem;
 
@@ -20,18 +19,17 @@ export function serviceTest(clusterUrl: string) {
 
         before(async function() {
             this.timeout(50000);
-            driver = VSBrowser.instance.driver;
             const view = await new ActivityBar().getViewControl('OpenShift').openView();
             const explorer = await view.getContent().getSection('openshift application explorer');
             clusterNode = await explorer.findItem(clusterUrl);
-            await createProject(projectName, clusterNode, driver, 15000);
-            application = await createApplication(appName, projectName, clusterNode, driver, 10000);
+            await createProject(projectName, clusterNode, 15000);
+            application = await createApplication(appName, projectName, clusterNode, 10000);
             component = await createComponentFromGit(componentName, gitRepo, appName, projectName, clusterNode, 25000);
         });
 
         after(async function() {
             this.timeout(30000);
-            await deleteProject(projectName, clusterNode, driver);
+            await deleteProject(projectName, clusterNode);
         });
 
         it('New Service can be created from context menu', async function() {
@@ -49,7 +47,7 @@ export function serviceTest(clusterUrl: string) {
             const service = await application.findChildItem(serviceName);
             const menu = await service.openContextMenu();
             await menu.select('Describe');
-            await checkTerminalText(`odo catalog describe service ${serviceType}`, driver);
+            await checkTerminalText(`odo catalog describe service ${serviceType}`);
         });
 
         it('Describe works from command palette', async function() {
@@ -58,7 +56,7 @@ export function serviceTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(serviceName);
 
-            await checkTerminalText(`odo catalog describe service ${serviceType}`, driver);
+            await checkTerminalText(`odo catalog describe service ${serviceType}`);
         });
 
         it('Service can be deleted from context menu', async function() {
@@ -67,7 +65,7 @@ export function serviceTest(clusterUrl: string) {
             const menu = await service.openContextMenu();
             await menu.select('Delete');
 
-            await verifyNodeDeletion(serviceName, application, 'Service', driver, 80000);
+            await verifyNodeDeletion(serviceName, application, 'Service', 80000);
         });
 
         it('New Service can be created from command palette', async function() {
@@ -87,7 +85,7 @@ export function serviceTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(serviceName1);
 
-            await verifyNodeDeletion(serviceName1, application, 'Service', driver, 80000);
+            await verifyNodeDeletion(serviceName1, application, 'Service', 80000);
         });
     });
 }

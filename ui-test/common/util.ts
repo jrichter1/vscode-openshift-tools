@@ -1,4 +1,4 @@
-import { Workbench, Notification, NotificationType, InputBox, ViewItem, WebDriver, until, By, TerminalView, StatusBar } from "vscode-extension-tester";
+import { Workbench, Notification, NotificationType, InputBox, ViewItem, WebDriver, until, By, TerminalView, VSBrowser } from "vscode-extension-tester";
 import { nodeHasNewChildren, terminalHasNoChanges, inputHasError, notificationExists, inputHasQuickPicks, inputHasNewMessage } from "./conditions";
 import { expect } from "chai";
 
@@ -32,38 +32,38 @@ export async function setInputTextAndCheck(input: InputBox, text: string, error:
 
     expect(message).has.string(error);
     await input.setText('validtext');
-    await input.getDriver().sleep(800);
+    await input.getDriver().wait(() => { return inputHasNewMessage(input, message); }, 2000);
 }
 
-export async function createProject(name: string, cluster: ViewItem, driver: WebDriver, timeout: number = 5000) {
+export async function createProject(name: string, cluster: ViewItem, timeout: number = 5000) {
     const children = await cluster.getChildren();
     await new Workbench().executeCommand('openshift new project');
-    const input = await new InputBox().wait(3000);
-    await input.setText(name);
-    await input.confirm();
-    await driver.wait(() => { return nodeHasNewChildren(cluster, children); }, timeout);
+    await setInputTextAndConfirm(name);
+    await cluster.getDriver().wait(() => { return nodeHasNewChildren(cluster, children); }, timeout);
 }
 
-export async function deleteProject(name: string, cluster: ViewItem, driver: WebDriver) {
+export async function deleteProject(name: string, cluster: ViewItem) {
+    const driver = await cluster.getDriver();
     const children = await cluster.getChildren();
     await new Workbench().executeCommand('openshift delete project');
-    const input = await new InputBox().wait(3000);
-    await input.setText(name);
-    await input.confirm();
+    await setInputTextAndConfirm(name);
     const confirmation = await driver.wait(() => { return notificationExists('Do you want to delete Project'); }, 20000);
     await confirmation.takeAction('Yes');
-    await driver.wait(() => { return nodeHasNewChildren(cluster, children); }, 20000);
+    try {
+        await driver.wait(() => { return nodeHasNewChildren(cluster, children); }, 20000);
+    } catch (err) {
+        // try again if the project disappears right as it is being looked up
+        await driver.wait(() => { return nodeHasNewChildren(cluster, children); }, 2000);
+    }
 }
 
-export async function createApplication(name: string, projectName: string, cluster: ViewItem, driver: WebDriver, timeout: number = 5000) {
+export async function createApplication(name: string, projectName: string, cluster: ViewItem, timeout: number = 5000) {
+    const driver = await cluster.getDriver();
     const project = await cluster.findChildItem(projectName);
     const children = await project.getChildren();
     await new Workbench().executeCommand('openshift new application');
-    const input = await new InputBox().wait(3000);
-    await input.selectQuickPick(projectName);
-    await driver.sleep(800);
-    await input.setText(name);
-    await input.confirm();
+    await quickPick(projectName, true);
+    await setInputTextAndConfirm(name);
     if (!await project.findChildItem(name)) {
         await driver.wait(() => { return nodeHasNewChildren(project, children); }, timeout);
     }
@@ -77,9 +77,9 @@ export async function createComponentFromGit(name: string, repo: string, appName
     const children = await application.getChildren();
     await new Workbench().executeCommand('openshift new component from git');
     await selectApplication(projectName, appName);
-    await setInputTextAndConfirm(repo, true);
+    await setInputTextAndConfirm(repo);
     await quickPick('master', true);
-    await setInputTextAndConfirm(name, true);
+    await setInputTextAndConfirm(name);
     await quickPick('nodejs', true);
     await quickPick('latest');
     const notification = await driver.wait(() => { return notificationExists('Do you want to clone git repository for created Component?'); }, 5000);
@@ -90,8 +90,9 @@ export async function createComponentFromGit(name: string, repo: string, appName
     return await application.findChildItem(name);
 }
 
-export async function checkTerminalText(expectedText: string, driver: WebDriver, timeout: number = 8000, period: number = 2000) {
-    await new StatusBar().closeNotificationsCenter();
+export async function checkTerminalText(expectedText: string, timeout: number = 8000, period: number = 2000) {
+    const driver = await VSBrowser.instance.driver;
+    await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
     await driver.wait(until.elementLocated(By.id('workbench.panel.terminal')));
     const terminalView = await new TerminalView().wait();
     const text = await driver.wait(() => { return terminalHasNoChanges(terminalView, period); }, timeout);
@@ -111,7 +112,8 @@ export async function quickPick(title: string, shouldWait: boolean = false) {
     }
 }
 
-export async function verifyNodeDeletion(nodeName: string, parent: ViewItem, type: string, driver: WebDriver, timeout: number) {
+export async function verifyNodeDeletion(nodeName: string, parent: ViewItem, type: string, timeout: number) {
+    const driver = parent.getDriver();
     const initItems = await parent.getChildren();
     const confirmation = await driver.wait(() => {
         return notificationExists(`Do you want to delete ${type} '${nodeName}'?`);

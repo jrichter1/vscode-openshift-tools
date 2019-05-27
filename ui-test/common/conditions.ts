@@ -72,12 +72,12 @@ export async function inputHasQuickPicks(input: Input) {
 
 export async function inputHasNewMessage(input: InputBox, message: string, placeholder?: string) {
     const currentMessage = await input.getMessage();
-    if (currentMessage !== message) {
+    if (currentMessage && (currentMessage !== message)) {
         return true;
     }
     if (placeholder) {
         const currentHolder = await input.getPlaceHolder();
-        return placeholder !== currentHolder;
+        return (placeholder !== currentHolder) && currentHolder;
     }
     return false;
 }

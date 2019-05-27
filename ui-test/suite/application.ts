@@ -1,11 +1,10 @@
-import { ViewItem, WebDriver, VSBrowser, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
+import { ViewItem, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
 import { createProject, checkTerminalText, deleteProject, setInputTextAndCheck, quickPick, findNotification, verifyNodeDeletion } from "../common/util";
 import { expect } from 'chai';
 import { nodeHasNewChildren, NAME_EXISTS } from "../common/conditions";
 
 export function applicationTest(clusterUrl: string) {
     let clusterNode: ViewItem;
-    let driver: WebDriver;
     const projectName = 'app-test-project';
     const projectName1 = 'app-test-project1';
     const appName = 'test-application';
@@ -14,19 +13,18 @@ export function applicationTest(clusterUrl: string) {
     describe('OpenShift Application', () => {
         before(async function() {
             this.timeout(20000);
-            driver = VSBrowser.instance.driver;
             const view = await new ActivityBar().getViewControl('OpenShift').openView();
             const explorer = await view.getContent().getSection('openshift application explorer');
             clusterNode = await explorer.findItem(clusterUrl);
 
-            await createProject(projectName, clusterNode, driver);
-            await createProject(projectName1, clusterNode, driver);
+            await createProject(projectName, clusterNode);
+            await createProject(projectName1, clusterNode);
         });
 
         after(async function() {
             this.timeout(30000);
-            await deleteProject(projectName, clusterNode, driver);
-            await deleteProject(projectName1, clusterNode, driver);
+            await deleteProject(projectName, clusterNode);
+            await deleteProject(projectName1, clusterNode);
         });
 
         it('Application can be created from context menu', async function() {
@@ -34,7 +32,7 @@ export function applicationTest(clusterUrl: string) {
             const project = await clusterNode.findChildItem(projectName);
             const menu = await project.openContextMenu();
             await menu.select('New Application');
-            await verifyAppCreation(appName, project, driver);
+            await verifyAppCreation(appName, project);
 
             const notification = findNotification(`Application '${appName}' successfully created`);
             expect(notification).not.undefined;
@@ -45,7 +43,7 @@ export function applicationTest(clusterUrl: string) {
             const project = await clusterNode.findChildItem(projectName1);
             await new Workbench().executeCommand('openshift new application');
             await quickPick(projectName1, true);
-            await verifyAppCreation(appName1, project, driver);
+            await verifyAppCreation(appName1, project);
 
             const notification = findNotification(`Application '${appName1}' successfully created`);
             expect(notification).not.undefined;
@@ -68,7 +66,7 @@ export function applicationTest(clusterUrl: string) {
             const menu = await application.openContextMenu();
             await menu.select('Describe');
 
-            await checkTerminalText(`odo app describe ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo app describe ${appName} --project ${projectName}`);
         });
 
         it('Describe works from command palette', async function() {
@@ -77,7 +75,7 @@ export function applicationTest(clusterUrl: string) {
             await quickPick(projectName1, true);
             await quickPick(appName1);
 
-            await checkTerminalText(`odo app describe ${appName1} --project ${projectName1}`, driver);
+            await checkTerminalText(`odo app describe ${appName1} --project ${projectName1}`);
         });
 
         it('Application can be deleted from context menu', async function() {
@@ -86,7 +84,7 @@ export function applicationTest(clusterUrl: string) {
             const application = await project.findChildItem(appName);
             const menu = await application.openContextMenu();
             await menu.select('Delete');
-            await verifyNodeDeletion(appName, project, 'Application', driver, 15000);
+            await verifyNodeDeletion(appName, project, 'Application', 15000);
         });
 
         it('Application can be deleted from command palette', async function() {
@@ -95,7 +93,7 @@ export function applicationTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift delete application');
             await quickPick(projectName1, true);
             await quickPick(appName1);
-            await verifyNodeDeletion(appName1, project, 'Application', driver, 15000);
+            await verifyNodeDeletion(appName1, project, 'Application', 15000);
         });
 
         it('Application name is being validated', async function() {
@@ -116,12 +114,12 @@ export function applicationTest(clusterUrl: string) {
     });
 }
 
-async function verifyAppCreation(appName: string, project: ViewItem, driver: WebDriver) {
+async function verifyAppCreation(appName: string, project: ViewItem) {
     const input = await new InputBox().wait(3000);
     expect(await input.getMessage()).has.string('Provide Application name');
     await input.setText(appName);
     await input.confirm();
-    const apps = await driver.wait(() => { return nodeHasNewChildren(project); }, 5000);
+    const apps = await project.getDriver().wait(() => { return nodeHasNewChildren(project); }, 5000);
 
     const names = [];
     for (const app of apps) {

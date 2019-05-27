@@ -1,11 +1,10 @@
-import { ViewSection, ViewItem, InputBox, Workbench, WebDriver, VSBrowser, ActivityBar } from "vscode-extension-tester";
+import { ViewSection, ViewItem, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
 import { setInputTextAndConfirm, findNotification, setInputTextAndCheck, verifyNodeDeletion } from "../common/util";
 import { nodeHasNewChildren, NAME_EXISTS } from "../common/conditions";
 import { expect } from 'chai';
 
 export function projectTest(clusterUrl: string) {
     describe('OpenShift Project', () => {
-        let driver: WebDriver;
         let explorer: ViewSection;
         let clusterNode: ViewItem;
 
@@ -13,18 +12,17 @@ export function projectTest(clusterUrl: string) {
         const projectName1 = 'test-project1';
 
         before(async () => {
-            driver = VSBrowser.instance.driver;
             const view = await new ActivityBar().getViewControl('OpenShift').openView();
             explorer = await view.getContent().getSection('openshift application explorer');
             clusterNode = await explorer.findItem(clusterUrl);
         });
 
-        it('New project can be created from cluster node', async function() {
+        it('New project can be created from context menu', async function() {
             this.timeout(20000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('New Project');
 
-            await handleNewProject(projectName, clusterNode, driver);
+            await handleNewProject(projectName, clusterNode);
             const notification = await findNotification(`Project '${projectName}' successfully created`);
             expect(notification).not.undefined;
         });
@@ -33,7 +31,7 @@ export function projectTest(clusterUrl: string) {
             this.timeout(20000);
             await new Workbench().executeCommand('openshift new project');
 
-            await handleNewProject(projectName1, clusterNode, driver);
+            await handleNewProject(projectName1, clusterNode);
             const notification = await findNotification(`Project '${projectName1}' successfully created`);
             expect(notification).not.undefined;
         });
@@ -51,7 +49,7 @@ export function projectTest(clusterUrl: string) {
             this.timeout(30000);
             const project = await clusterNode.findChildItem(projectName);
             await project.openContextMenu().then((menu) => { menu.select('Delete'); });
-            await verifyNodeDeletion(projectName, clusterNode, 'Project', driver, 20000);
+            await verifyNodeDeletion(projectName, clusterNode, 'Project', 20000);
         });
 
         it('Project can be deleted via command palette', async function() {
@@ -59,7 +57,7 @@ export function projectTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift delete project');
             const input = await new InputBox().wait(3000);
             await input.selectQuickPick(projectName1);
-            await verifyNodeDeletion(projectName1, clusterNode, 'Project', driver, 20000);
+            await verifyNodeDeletion(projectName1, clusterNode, 'Project', 20000);
         });
 
         it('Project name is being validated', async function() {
@@ -79,12 +77,12 @@ export function projectTest(clusterUrl: string) {
     });
 }
 
-async function handleNewProject(projectName: string,  clusterNode: ViewItem, driver: WebDriver) {
+async function handleNewProject(projectName: string,  clusterNode: ViewItem) {
     const input = await new InputBox().wait(3000);
     expect(await input.getMessage()).has.string('Provide Project name');
     await setInputTextAndConfirm(projectName);
 
-    await driver.wait(() => { return nodeHasNewChildren(clusterNode); }, 15000);
+    await clusterNode.getDriver().wait(() => { return nodeHasNewChildren(clusterNode); }, 15000);
     const labels = [];
     for (const item of await clusterNode.getChildren()) {
         labels.push(item.getLabel());

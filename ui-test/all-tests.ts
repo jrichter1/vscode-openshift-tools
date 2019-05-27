@@ -60,11 +60,11 @@ describe('System tests', () => {
     });
 
     login.loginTest(clusterUrl);
-    // cluster.clusterTest(clusterUrl);
-    // project.projectTest(clusterUrl);
+    cluster.clusterTest(clusterUrl);
+    project.projectTest(clusterUrl);
     application.applicationTest(clusterUrl);
-    // component.componentTest(clusterUrl);
-    // service.serviceTest(clusterUrl);
+    component.componentTest(clusterUrl);
+    service.serviceTest(clusterUrl);
 });
 
 async function openFolder(path: string) {

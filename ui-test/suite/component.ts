@@ -29,14 +29,14 @@ export function componentTest(clusterUrl: string) {
             const view = await new ActivityBar().getViewControl('OpenShift').openView();
             explorer = await view.getContent().getSection('openshift application explorer');
             clusterNode = await explorer.findItem(clusterUrl);
-            await createProject(projectName, clusterNode, driver, 10000);
-            application = await createApplication(appName, projectName, clusterNode, driver, 5000);
+            await createProject(projectName, clusterNode, 10000);
+            application = await createApplication(appName, projectName, clusterNode, 5000);
             await Archive.unzip(projectZip, resources);
         });
 
         after(async function() {
             this.timeout(30000);
-            await deleteProject(projectName, clusterNode, driver);
+            await deleteProject(projectName, clusterNode);
         });
 
         it('New Component can be created from context menu', async function() {
@@ -64,7 +64,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
 
             expect(await input.getMessage()).has.string('Git repository URI');
-            await setInputTextAndConfirm(gitRepo, true);
+            await setInputTextAndConfirm(gitRepo);
             await driver.wait(() => { return inputHasQuickPicks(input); });
             expect(await input.getPlaceHolder()).has.string('Select git reference');
             await quickPick('HEAD', true);
@@ -74,7 +74,7 @@ export function componentTest(clusterUrl: string) {
             const notification = await driver.wait(() => { return notificationExists('Do you want to clone git repository for created Component?'); }, 5000);
             await notification.takeAction('No');
 
-            await verifyComponent(gitComponentName, application, driver, initItems);
+            await verifyComponent(gitComponentName, application, initItems);
         });
 
         it('New component can be created from a workspace folder', async function() {
@@ -89,7 +89,7 @@ export function componentTest(clusterUrl: string) {
             await quickPick('nodejs-ex', true);
 
             await createComponent(localComponentName, 'nodejs');
-            await verifyComponent(localComponentName, application, driver, initItems);
+            await verifyComponent(localComponentName, application, initItems);
         });
 
         it('New component can be created from a binary file', async function() {
@@ -104,7 +104,7 @@ export function componentTest(clusterUrl: string) {
             await dialog.confirm();
 
             await createComponent(binaryComponentName, 'wildfly');
-            await verifyComponent(binaryComponentName, application, driver, initItems);
+            await verifyComponent(binaryComponentName, application, initItems);
         });
 
         it('Duplicate component name is not allowed', async function() {
@@ -143,7 +143,7 @@ export function componentTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select('Describe');
 
-            await checkTerminalText(`odo describe ${gitComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo describe ${gitComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Describe works from command palette', async function() {
@@ -152,7 +152,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(localComponentName);
 
-            await checkTerminalText(`odo describe ${localComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo describe ${localComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Show Log works from context menu', async function() {
@@ -161,7 +161,7 @@ export function componentTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select('Show Log');
 
-            await checkTerminalText(`odo log ${gitComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo log ${gitComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Show Log works from command palette', async function() {
@@ -170,7 +170,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(localComponentName);
 
-            await checkTerminalText(`odo log ${localComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo log ${localComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Follow Log works from context menu', async function() {
@@ -179,7 +179,7 @@ export function componentTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select('Follow Log');
 
-            await checkTerminalText(`odo log ${gitComponentName} -f --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo log ${gitComponentName} -f --app ${appName} --project ${projectName}`);
         });
 
         it('Follow Log works from command palette', async function() {
@@ -188,7 +188,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(localComponentName);
 
-            await checkTerminalText(`odo log ${localComponentName} -f --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo log ${localComponentName} -f --app ${appName} --project ${projectName}`);
         });
 
         it('Watch works from context menu', async function() {
@@ -197,7 +197,7 @@ export function componentTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select('Watch');
 
-            await checkTerminalText(`odo watch ${gitComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo watch ${gitComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Watch works from command palette', async function() {
@@ -206,7 +206,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(localComponentName);
 
-            await checkTerminalText(`odo watch ${localComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo watch ${localComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Push works from context menu', async function() {
@@ -215,7 +215,7 @@ export function componentTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select('Push');
 
-            await checkTerminalText(`odo push ${gitComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo push ${gitComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Push works from command palette', async function() {
@@ -224,7 +224,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(localComponentName);
 
-            await checkTerminalText(`odo push ${localComponentName} --app ${appName} --project ${projectName}`, driver);
+            await checkTerminalText(`odo push ${localComponentName} --app ${appName} --project ${projectName}`);
         });
 
         it('Open in Browser is available from context menu', async function() {
@@ -284,7 +284,7 @@ export function componentTest(clusterUrl: string) {
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
             await menu.select('Delete');
-            await verifyNodeDeletion(gitComponentName, application, 'Component', driver, 30000);
+            await verifyNodeDeletion(gitComponentName, application, 'Component', 30000);
         });
 
         it('Component can be deleted from command palette', async function() {
@@ -292,7 +292,7 @@ export function componentTest(clusterUrl: string) {
             new Workbench().executeCommand('openshift delete component');
             await selectApplication(projectName, appName);
             await quickPick(localComponentName, false);
-            await verifyNodeDeletion(localComponentName, application, 'Component', driver, 30000);
+            await verifyNodeDeletion(localComponentName, application, 'Component', 30000);
         });
     });
 }
@@ -301,19 +301,19 @@ async function createComponent(name: string, type: string, typeVersion: string =
     const input = await new InputBox().wait(3000);
     const driver = input.getDriver();
     expect(await input.getMessage()).has.string('Provide Component name');
-    await setInputTextAndConfirm(name, true);
+    await setInputTextAndConfirm(name);
 
-    await driver.wait(() => { return inputHasQuickPicks(input); }, 2000);
+    await driver.wait(() => { return inputHasQuickPicks(input); }, 4000);
     expect(await input.getPlaceHolder()).equals('Component type');
     await quickPick(type, true);
 
-    await driver.wait(() => { return inputHasQuickPicks(input); }, 2000);
+    await driver.wait(() => { return inputHasQuickPicks(input); }, 4000);
     expect(await input.getPlaceHolder()).equals('Component type version');
     await quickPick(typeVersion);
 }
 
-async function verifyComponent(name: string, application: ViewItem, driver: WebDriver, initItems: ViewItem[], del: boolean = false) {
-    const components = (await driver.wait(() => { return nodeHasNewChildren(application, initItems); }, 40000)).map((item) => {
+async function verifyComponent(name: string, application: ViewItem, initItems: ViewItem[], del: boolean = false) {
+    const components = (await application.getDriver().wait(() => { return nodeHasNewChildren(application, initItems); }, 40000)).map((item) => {
         return item.getLabel();
     });
     if (del) {

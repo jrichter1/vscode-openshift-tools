@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { execSync } from 'child_process';
 import { Platform } from "../../src/util/platform";
 import * as path from 'path';
-import { viewHasNoProgress, notificationExists, viewHasItems } from "../common/conditions";
+import { viewHasNoProgress, notificationExists, viewHasItems, inputHasNewMessage } from "../common/conditions";
 import { findNotification, setInputTextAndConfirm, quickPick } from "../common/util";
 
 export function loginTest(clusterUrl: string) {
@@ -120,7 +120,8 @@ async function confirmLogout(driver: WebDriver) {
 
 async function credentialsLogin(url: string, user?: string, password?: string) {
     // select credentials login
-    const input = new InputBox();
+    const input = await new InputBox().wait(3000);
+    await input.getDriver().wait(() => { return inputHasNewMessage(input, '', 'a'); }, 2000);
     expect(await input.getPlaceHolder()).equals('Select the way to log in to the cluster.');
     const quickPicks = await input.getQuickPicks();
     expect(await quickPicks[0].getText()).equals('Credentials');

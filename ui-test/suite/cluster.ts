@@ -19,33 +19,33 @@ export function clusterTest(clusterUrl: string) {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('List Catalog Components');
-            await checkTerminalText('odo catalog list components', driver);
+            await checkTerminalText('odo catalog list components');
         });
 
         it('List Catalog Components works from command palette', async function() {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift catalog components');
-            await checkTerminalText('odo catalog list components', driver);
+            await checkTerminalText('odo catalog list components');
         });
 
         it('List Catalog Services works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('List Catalog Services');
-            await checkTerminalText('odo catalog list services', driver);
+            await checkTerminalText('odo catalog list services');
         });
 
         it('List Catalog Services works from command palette', async function() {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift catalog services');
-            await checkTerminalText('odo catalog list services', driver);
+            await checkTerminalText('odo catalog list services');
         });
 
         it('About works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('About');
-            await checkTerminalText('odo version', driver);
+            await checkTerminalText('odo version');
         });
 
         it('Show Output Channel works from command palette', async function() {
@@ -62,7 +62,7 @@ export function clusterTest(clusterUrl: string) {
         it('About works from command palette', async function() {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift about');
-            await checkTerminalText('odo version', driver);
+            await checkTerminalText('odo version');
         });
 
         it('Show Output Channel works from context menu', async function() {
