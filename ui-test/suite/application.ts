@@ -44,7 +44,7 @@ export function applicationTest(clusterUrl: string) {
             this.timeout(20000);
             const project = await clusterNode.findChildItem(projectName1);
             await new Workbench().executeCommand('openshift new application');
-            await quickPick(projectName1, driver);
+            await quickPick(projectName1, true);
             await verifyAppCreation(appName1, project, driver);
 
             const notification = findNotification(`Application '${appName1}' successfully created`);
@@ -54,7 +54,7 @@ export function applicationTest(clusterUrl: string) {
         it('Duplicate application name is not allowed', async function() {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift new application');
-            await quickPick(projectName1, driver);
+            await quickPick(projectName1, true);
 
             const input = await new InputBox().wait(3000);
             await setTextAndCheck(input, appName1, NAME_EXISTS);
@@ -74,8 +74,8 @@ export function applicationTest(clusterUrl: string) {
         it('Describe works from command palette', async function() {
             this.timeout(20000);
             await new Workbench().executeCommand('openshift describe application');
-            await quickPick(projectName1, driver);
-            await quickPick(appName1, driver);
+            await quickPick(projectName1, true);
+            await quickPick(appName1);
 
             await checkTerminalText(`odo app describe ${appName1} --project ${projectName1}`, driver);
         });
@@ -93,8 +93,8 @@ export function applicationTest(clusterUrl: string) {
             this.timeout(20000);
             const project = await clusterNode.findChildItem(projectName1);
             await new Workbench().executeCommand('openshift delete application');
-            await quickPick(projectName1, driver);
-            await quickPick(appName1, driver);
+            await quickPick(projectName1, true);
+            await quickPick(appName1);
             await verifyNodeDeletion(appName1, project, 'Application', driver, 15000);
         });
 
@@ -103,7 +103,7 @@ export function applicationTest(clusterUrl: string) {
             const invalidName = 'Not a valid Application name';
             const invalidLength = 'Application name should be between 2-63 characters';
             new Workbench().executeCommand('openshift new application');
-            await quickPick(projectName, driver);
+            await quickPick(projectName, true);
 
             const input = await new InputBox().wait(3000);
             await setTextAndCheck(input, '1app', invalidName);

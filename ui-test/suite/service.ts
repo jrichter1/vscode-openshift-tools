@@ -40,9 +40,8 @@ export function serviceTest(clusterUrl: string) {
             const menu = await application.openContextMenu();
             await menu.select('New Service');
 
-            const input = await new InputBox().wait(3000);
-            await createService(input, serviceType, serviceName);
-            await verifyService(serviceName, application, driver, items);
+            await createService(serviceType, serviceName);
+            await verifyService(serviceName, application, items);
         });
 
         it('Describe works from context menu', async function() {
@@ -56,9 +55,8 @@ export function serviceTest(clusterUrl: string) {
         it('Describe works from command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift describe service');
-            const input = await new InputBox().wait(3000);
-            await selectApplication(input, projectName, appName);
-            await input.selectQuickPick(serviceName);
+            await selectApplication(projectName, appName);
+            await quickPick(serviceName);
 
             await checkTerminalText(`odo catalog describe service ${serviceType}`, driver);
         });
@@ -77,34 +75,33 @@ export function serviceTest(clusterUrl: string) {
             const items = await application.getChildren();
             await new Workbench().executeCommand('openshift new service');
 
-            const input = await new InputBox().wait(3000);
-            await selectApplication(input, projectName, appName);
-            await createService(input, serviceType, serviceName1);
+            await selectApplication(projectName, appName);
+            await createService(serviceType, serviceName1);
 
-            await verifyService(serviceName1, application, driver, items);
+            await verifyService(serviceName1, application, items);
         });
 
         it('Service can be deleted from commande palette', async function() {
             this.timeout(90000);
             await new Workbench().executeCommand('openshift delete service');
-            const input = await new InputBox().wait(3000);
-            await selectApplication(input, projectName, appName);
-            await input.selectQuickPick(serviceName1);
+            await selectApplication(projectName, appName);
+            await quickPick(serviceName1);
 
             await verifyNodeDeletion(serviceName1, application, 'Service', driver, 80000);
         });
     });
 }
 
-async function createService(input: InputBox, type: string, name: string) {
-    const driver = input.getDriver();
+async function createService(type: string, name: string) {
+    const input = await new InputBox().wait(3000);
     expect(await input.getPlaceHolder()).equals('Service Template Name');
-    await quickPick(type, driver);
+    await quickPick(type, true);
     expect(await input.getMessage()).has.string('Provide Service name');
     await setInputTextAndConfirm(input, name);
 }
 
-async function verifyService(name: string, application: ViewItem, driver: WebDriver, initItems: ViewItem[], del: boolean = false) {
+async function verifyService(name: string, application: ViewItem, initItems: ViewItem[], del: boolean = false) {
+    const driver = application.getDriver();
     const items = (await driver.wait(() => { return nodeHasNewChildren(application, initItems); }, 180000)).map((item) => {
         return item.getLabel();
     });

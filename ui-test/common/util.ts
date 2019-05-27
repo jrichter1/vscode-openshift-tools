@@ -70,7 +70,7 @@ export async function createComponentFromGit(name: string, repo: string, appName
     const children = await application.getChildren();
     await new Workbench().executeCommand('openshift new component from git');
     const input = await new InputBox().wait(3000);
-    await selectApplication(input, projectName, appName);
+    await selectApplication(projectName, appName);
     await setInputTextAndConfirm(input, repo);
     await quickPick('master', true);
     await setInputTextAndConfirm(input, name);
@@ -96,11 +96,11 @@ export async function quickPick(title: string, shouldWait: boolean = false) {
     const input = await new InputBox().wait(3000);
     const driver = input.getDriver();
     await driver.wait(() => { return inputHasQuickPicks(input); }, 5000);
+    const message = await input.getMessage();
+    const placeHolder = await input.getPlaceHolder();
     await input.selectQuickPick(title);
 
     if (shouldWait) {
-        const message = await input.getMessage();
-        const placeHolder = await input.getPlaceHolder();
         await driver.wait(() => { return inputHasNewMessage(input, message, placeHolder); }, 3000);
     }
 }
@@ -123,8 +123,7 @@ export async function verifyNodeDeletion(nodeName: string, parent: ViewItem, typ
     expect(item).undefined;
 }
 
-export async function selectApplication(input: InputBox, projectName: string, appName: string) {
-    const driver = input.getDriver();
-    await quickPick(projectName, driver);
-    await quickPick(appName, driver);
+export async function selectApplication(projectName: string, appName: string) {
+    await quickPick(projectName, true);
+    await quickPick(appName);
 }

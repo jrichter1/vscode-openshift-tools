@@ -61,15 +61,15 @@ export function componentTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new component from git repository');
 
             const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
+            await selectApplication(projectName, appName);
 
             expect(await input.getMessage()).has.string('Git repository URI');
             await setInputTextAndConfirm(input, gitRepo);
             await driver.wait(() => { return inputHasQuickPicks(input); });
             expect(await input.getPlaceHolder()).has.string('Select git reference');
-            await quickPick('HEAD', driver);
+            await quickPick('HEAD', true);
 
-            await createComponent(input, gitComponentName, 'nodejs');
+            await createComponent(gitComponentName, 'nodejs');
 
             const notification = await driver.wait(() => { return notificationExists('Do you want to clone git repository for created Component?'); }, 5000);
             await notification.takeAction('No');
@@ -83,12 +83,12 @@ export function componentTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new component from local folder');
 
             const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
+            await selectApplication(projectName, appName);
 
             expect(await input.getPlaceHolder()).equals('Select the target workspace folder');
-            await quickPick('nodejs-ex', driver);
+            await quickPick('nodejs-ex', true);
 
-            await createComponent(input, localComponentName, 'nodejs');
+            await createComponent(localComponentName, 'nodejs');
             await verifyComponent(localComponentName, application, driver, initItems);
         });
 
@@ -97,14 +97,13 @@ export function componentTest(clusterUrl: string) {
             const initItems = await application.getChildren();
             await new Workbench().executeCommand('openshift new component from binary');
 
-            const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
+            await selectApplication(projectName, appName);
 
             const dialog = await DialogHandler.getOpenDialog();
             await dialog.selectPath(testWar);
             await dialog.confirm();
 
-            await createComponent(input, binaryComponentName, 'wildfly');
+            await createComponent(binaryComponentName, 'wildfly');
             await verifyComponent(binaryComponentName, application, driver, initItems);
         });
 
@@ -113,8 +112,8 @@ export function componentTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new component from local folder');
 
             const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
-            await quickPick('nodejs-ex', driver);
+            await selectApplication(projectName, appName);
+            await quickPick('nodejs-ex', true);
 
             await setTextAndCheck(input, localComponentName, NAME_EXISTS);
             await input.cancel();
@@ -127,8 +126,8 @@ export function componentTest(clusterUrl: string) {
             const invalidLength = 'Component name should be between 2-63 characters';
 
             const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
-            await quickPick('nodejs-ex', driver);
+            await selectApplication(projectName, appName);
+            await quickPick('nodejs-ex', true);
 
             await setTextAndCheck(input, '1comp', invalidName);
             await setTextAndCheck(input, 'a@p#p%', invalidName);
@@ -150,9 +149,8 @@ export function componentTest(clusterUrl: string) {
         it('Describe works from command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift describe component');
-            const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
-            await input.selectQuickPick(localComponentName);
+            await selectApplication(projectName, appName);
+            await quickPick(localComponentName);
 
             await checkTerminalText(`odo describe ${localComponentName} --app ${appName} --project ${projectName}`, driver);
         });
@@ -169,9 +167,8 @@ export function componentTest(clusterUrl: string) {
         it('Show Log works from command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift show component log');
-            const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
-            await input.selectQuickPick(localComponentName);
+            await selectApplication(projectName, appName);
+            await quickPick(localComponentName);
 
             await checkTerminalText(`odo log ${localComponentName} --app ${appName} --project ${projectName}`, driver);
         });
@@ -188,9 +185,8 @@ export function componentTest(clusterUrl: string) {
         it('Follow Log works from command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift follow component log');
-            const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
-            await input.selectQuickPick(localComponentName);
+            await selectApplication(projectName, appName);
+            await quickPick(localComponentName);
 
             await checkTerminalText(`odo log ${localComponentName} -f --app ${appName} --project ${projectName}`, driver);
         });
@@ -207,9 +203,8 @@ export function componentTest(clusterUrl: string) {
         it('Watch works from command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift watch component');
-            const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
-            await input.selectQuickPick(localComponentName);
+            await selectApplication(projectName, appName);
+            await quickPick(localComponentName);
 
             await checkTerminalText(`odo watch ${localComponentName} --app ${appName} --project ${projectName}`, driver);
         });
@@ -226,9 +221,8 @@ export function componentTest(clusterUrl: string) {
         it('Push works from command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift push component');
-            const input = await new InputBox().wait();
-            await selectApplication(input, projectName, appName);
-            await input.selectQuickPick(localComponentName);
+            await selectApplication(projectName, appName);
+            await quickPick(localComponentName);
 
             await checkTerminalText(`odo push ${localComponentName} --app ${appName} --project ${projectName}`, driver);
         });
@@ -266,7 +260,7 @@ export function componentTest(clusterUrl: string) {
             const input = await new InputBox().wait();
             expect(await input.getPlaceHolder()).equals('Select a Component to link');
 
-            await quickPick(binaryComponentName, driver);
+            await quickPick(binaryComponentName);
 
             await driver.wait(() => {
                 return notificationExists(`Component '${binaryComponentName}' successfully linked with Component '${gitComponentName}'`);
@@ -276,10 +270,9 @@ export function componentTest(clusterUrl: string) {
         it('Linking components works from command palette', async function() {
             this.timeout(60000);
             new Workbench().executeCommand('openshift link component');
-            const input = await new InputBox().wait(3000);
-            await selectApplication(input, projectName, appName);
-            await quickPick(gitComponentName, driver);
-            await quickPick(localComponentName, driver);
+            await selectApplication(projectName, appName);
+            await quickPick(gitComponentName, true);
+            await quickPick(localComponentName);
 
             await driver.wait(() => {
                 return notificationExists(`Component '${localComponentName}' successfully linked with Component '${gitComponentName}'`);
@@ -297,26 +290,26 @@ export function componentTest(clusterUrl: string) {
         it('Component can be deleted from command palette', async function() {
             this.timeout(60000);
             new Workbench().executeCommand('openshift delete component');
-            const input = await new InputBox().wait(3000);
-            await selectApplication(input, projectName, appName);
-            await quickPick(localComponentName, driver);
+            await selectApplication(projectName, appName);
+            await quickPick(localComponentName, false);
             await verifyNodeDeletion(localComponentName, application, 'Component', driver, 30000);
         });
     });
 }
 
-async function createComponent(input: InputBox, name: string, type: string, typeVersion: string = 'latest') {
+async function createComponent(name: string, type: string, typeVersion: string = 'latest') {
+    const input = await new InputBox().wait(3000);
     const driver = input.getDriver();
     expect(await input.getMessage()).has.string('Provide Component name');
     await setInputTextAndConfirm(input, name);
 
     await driver.wait(() => { return inputHasQuickPicks(input); }, 2000);
     expect(await input.getPlaceHolder()).equals('Component type');
-    await quickPick(type, driver);
+    await quickPick(type, true);
 
     await driver.wait(() => { return inputHasQuickPicks(input); }, 2000);
     expect(await input.getPlaceHolder()).equals('Component type version');
-    await quickPick(typeVersion, driver);
+    await quickPick(typeVersion);
 }
 
 async function verifyComponent(name: string, application: ViewItem, driver: WebDriver, initItems: ViewItem[], del: boolean = false) {
