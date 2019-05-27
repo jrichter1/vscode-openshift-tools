@@ -97,7 +97,7 @@ async function createService(type: string, name: string) {
     expect(await input.getPlaceHolder()).equals('Service Template Name');
     await quickPick(type, true);
     expect(await input.getMessage()).has.string('Provide Service name');
-    await setInputTextAndConfirm(input, name);
+    await setInputTextAndConfirm(name);
 }
 
 async function verifyService(name: string, application: ViewItem, initItems: ViewItem[], del: boolean = false) {

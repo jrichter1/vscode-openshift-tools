@@ -1,4 +1,4 @@
-import { Workbench, Notification, NotificationType, Input, InputBox, ViewItem, WebDriver, until, By, TerminalView, StatusBar } from "vscode-extension-tester";
+import { Workbench, Notification, NotificationType, InputBox, ViewItem, WebDriver, until, By, TerminalView, StatusBar } from "vscode-extension-tester";
 import { nodeHasNewChildren, terminalHasNoChanges, inputHasError, notificationExists, inputHasQuickPicks, inputHasNewMessage } from "./conditions";
 import { expect } from "chai";
 
@@ -13,13 +13,20 @@ export async function findNotification(message: string): Promise<Notification> {
     }
 }
 
-export async function setInputTextAndConfirm(input: Input, text?: string) {
+export async function setInputTextAndConfirm(text?: string, shouldWait: boolean = false) {
+    const input = await new InputBox().wait(3000);
+    const message = await input.getMessage();
+    const holder = await input.getPlaceHolder();
+
     if (text) { await input.setText(text); }
     await input.confirm();
-    await input.getDriver().sleep(800);
+
+    if (shouldWait) {
+        await input.getDriver().wait(() => { return inputHasNewMessage(input, message, holder); }, 3000);
+    }
 }
 
-export async function setTextAndCheck(input: InputBox, text: string, error: string) {
+export async function setInputTextAndCheck(input: InputBox, text: string, error: string) {
     await input.setText(text);
     const message = await input.getDriver().wait(() => { return inputHasError(input); }, 2000);
 
@@ -69,11 +76,10 @@ export async function createComponentFromGit(name: string, repo: string, appName
     const application = await project.findChildItem(appName);
     const children = await application.getChildren();
     await new Workbench().executeCommand('openshift new component from git');
-    const input = await new InputBox().wait(3000);
     await selectApplication(projectName, appName);
-    await setInputTextAndConfirm(input, repo);
+    await setInputTextAndConfirm(repo, true);
     await quickPick('master', true);
-    await setInputTextAndConfirm(input, name);
+    await setInputTextAndConfirm(name, true);
     await quickPick('nodejs', true);
     await quickPick('latest');
     const notification = await driver.wait(() => { return notificationExists('Do you want to clone git repository for created Component?'); }, 5000);

@@ -1,5 +1,5 @@
 import { ViewSection, ViewItem, InputBox, Workbench, WebDriver, VSBrowser, ActivityBar } from "vscode-extension-tester";
-import { setInputTextAndConfirm, findNotification, setTextAndCheck, verifyNodeDeletion } from "../common/util";
+import { setInputTextAndConfirm, findNotification, setInputTextAndCheck, verifyNodeDeletion } from "../common/util";
 import { nodeHasNewChildren, NAME_EXISTS } from "../common/conditions";
 import { expect } from 'chai';
 
@@ -43,7 +43,7 @@ export function projectTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new project');
 
             const input = await new InputBox().wait(3000);
-            await setTextAndCheck(input, projectName, NAME_EXISTS);
+            await setInputTextAndCheck(input, projectName, NAME_EXISTS);
             await input.cancel();
         });
 
@@ -69,11 +69,11 @@ export function projectTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new project');
 
             const input = await new InputBox().wait(3000);
-            await setTextAndCheck(input, '1project', invalidName);
-            await setTextAndCheck(input, 'Project', invalidName);
-            await setTextAndCheck(input, '-$@project', invalidName);
-            await setTextAndCheck(input, 'p', invalidLength);
-            await setTextAndCheck(input, 'this-project-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
+            await setInputTextAndCheck(input, '1project', invalidName);
+            await setInputTextAndCheck(input, 'Project', invalidName);
+            await setInputTextAndCheck(input, '-$@project', invalidName);
+            await setInputTextAndCheck(input, 'p', invalidLength);
+            await setInputTextAndCheck(input, 'this-project-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
             await input.cancel();
         });
     });
@@ -82,7 +82,7 @@ export function projectTest(clusterUrl: string) {
 async function handleNewProject(projectName: string,  clusterNode: ViewItem, driver: WebDriver) {
     const input = await new InputBox().wait(3000);
     expect(await input.getMessage()).has.string('Provide Project name');
-    setInputTextAndConfirm(input, projectName);
+    await setInputTextAndConfirm(projectName);
 
     await driver.wait(() => { return nodeHasNewChildren(clusterNode); }, 15000);
     const labels = [];

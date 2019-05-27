@@ -1,5 +1,5 @@
 import { ViewItem, ViewSection, WebDriver, VSBrowser, InputBox, Workbench, DialogHandler, ActivityBar } from "vscode-extension-tester";
-import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setTextAndCheck, checkTerminalText, verifyNodeDeletion, selectApplication } from "../common/util";
+import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setInputTextAndCheck, checkTerminalText, verifyNodeDeletion, selectApplication } from "../common/util";
 import { nodeHasNewChildren, notificationExists, inputHasQuickPicks, NAME_EXISTS } from "../common/conditions";
 import * as path from 'path';
 import { Archive } from '../../src/util/archive';
@@ -64,7 +64,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
 
             expect(await input.getMessage()).has.string('Git repository URI');
-            await setInputTextAndConfirm(input, gitRepo);
+            await setInputTextAndConfirm(gitRepo, true);
             await driver.wait(() => { return inputHasQuickPicks(input); });
             expect(await input.getPlaceHolder()).has.string('Select git reference');
             await quickPick('HEAD', true);
@@ -115,7 +115,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick('nodejs-ex', true);
 
-            await setTextAndCheck(input, localComponentName, NAME_EXISTS);
+            await setInputTextAndCheck(input, localComponentName, NAME_EXISTS);
             await input.cancel();
         });
 
@@ -129,11 +129,11 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick('nodejs-ex', true);
 
-            await setTextAndCheck(input, '1comp', invalidName);
-            await setTextAndCheck(input, 'a@p#p%', invalidName);
-            await setTextAndCheck(input, 'Component', invalidName);
-            await setTextAndCheck(input, 'c', invalidLength);
-            await setTextAndCheck(input, 'this-component-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
+            await setInputTextAndCheck(input, '1comp', invalidName);
+            await setInputTextAndCheck(input, 'a@p#p%', invalidName);
+            await setInputTextAndCheck(input, 'Component', invalidName);
+            await setInputTextAndCheck(input, 'c', invalidLength);
+            await setInputTextAndCheck(input, 'this-component-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
             await input.cancel();
         });
 
@@ -301,7 +301,7 @@ async function createComponent(name: string, type: string, typeVersion: string =
     const input = await new InputBox().wait(3000);
     const driver = input.getDriver();
     expect(await input.getMessage()).has.string('Provide Component name');
-    await setInputTextAndConfirm(input, name);
+    await setInputTextAndConfirm(name, true);
 
     await driver.wait(() => { return inputHasQuickPicks(input); }, 2000);
     expect(await input.getPlaceHolder()).equals('Component type');

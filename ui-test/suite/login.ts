@@ -3,8 +3,8 @@ import { expect } from 'chai';
 import { execSync } from 'child_process';
 import { Platform } from "../../src/util/platform";
 import * as path from 'path';
-import { viewHasNoProgress, notificationExists, viewHasItems, whileNotificationExists } from "../common/conditions";
-import { findNotification, setInputTextAndConfirm } from "../common/util";
+import { viewHasNoProgress, notificationExists, viewHasItems } from "../common/conditions";
+import { findNotification, setInputTextAndConfirm, quickPick } from "../common/util";
 
 export function loginTest(clusterUrl: string) {
     const username = process.env.OPENSHIFT_USERNAME ? process.env.OPENSHIFT_USERNAME : 'developer';
@@ -81,13 +81,12 @@ export function loginTest(clusterUrl: string) {
             await confirmLogout(driver);
 
             const input = await new InputBox().wait(3000);
-            await input.selectQuickPick('Token');
-            await input.getDriver().sleep(500);
-            await setInputTextAndConfirm(input, clusterUrl);
+            await quickPick('Token', true);
+            await setInputTextAndConfirm(clusterUrl, true);
 
             expect(await input.getMessage()).has.string('Provide Bearer token');
             expect(await input.isPassword()).to.be.true;
-            await setInputTextAndConfirm(input, userToken);
+            await setInputTextAndConfirm(userToken);
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
             await driver.wait(() => { return viewHasItems(explorer); }, 5000);
@@ -126,21 +125,20 @@ async function credentialsLogin(url: string, user?: string, password?: string) {
     const quickPicks = await input.getQuickPicks();
     expect(await quickPicks[0].getText()).equals('Credentials');
     expect(await quickPicks[1].getText()).equals('Token');
-    await input.selectQuickPick('Credentials');
-    await input.getDriver().sleep(500);
+    await quickPick('Credentials', true);
 
     // input URL
     expect(await input.getMessage()).has.string('Provide URL of the cluster to connect');
-    await setInputTextAndConfirm(input, url);
+    await setInputTextAndConfirm(url, true);
 
     // input username
     expect(await input.getMessage()).has.string('Provide Username for basic authentication');
-    await setInputTextAndConfirm(input, user);
+    await setInputTextAndConfirm(user, true);
 
     // input password
     expect(await input.getMessage()).has.string('Provide Password for basic authentication');
     expect(await input.isPassword()).to.be.true;
-    await setInputTextAndConfirm(input, password);
+    await setInputTextAndConfirm(password);
 }
 
 async function clickDownload(notification: Notification): Promise<void> {

@@ -1,7 +1,7 @@
 import { ViewItem, WebDriver, VSBrowser, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
-import { createProject, checkTerminalText, deleteProject, setTextAndCheck, quickPick, findNotification, verifyNodeDeletion } from "../common/util";
+import { createProject, checkTerminalText, deleteProject, setInputTextAndCheck, quickPick, findNotification, verifyNodeDeletion } from "../common/util";
 import { expect } from 'chai';
-import { nodeHasNewChildren, notificationExists, NAME_EXISTS } from "../common/conditions";
+import { nodeHasNewChildren, NAME_EXISTS } from "../common/conditions";
 
 export function applicationTest(clusterUrl: string) {
     let clusterNode: ViewItem;
@@ -57,7 +57,7 @@ export function applicationTest(clusterUrl: string) {
             await quickPick(projectName1, true);
 
             const input = await new InputBox().wait(3000);
-            await setTextAndCheck(input, appName1, NAME_EXISTS);
+            await setInputTextAndCheck(input, appName1, NAME_EXISTS);
             await input.cancel();
         });
 
@@ -106,11 +106,11 @@ export function applicationTest(clusterUrl: string) {
             await quickPick(projectName, true);
 
             const input = await new InputBox().wait(3000);
-            await setTextAndCheck(input, '1app', invalidName);
-            await setTextAndCheck(input, 'a@p#p%', invalidName);
-            await setTextAndCheck(input, 'App', invalidName);
-            await setTextAndCheck(input, 'a', invalidLength);
-            await setTextAndCheck(input, 'this-application-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
+            await setInputTextAndCheck(input, '1app', invalidName);
+            await setInputTextAndCheck(input, 'a@p#p%', invalidName);
+            await setInputTextAndCheck(input, 'App', invalidName);
+            await setInputTextAndCheck(input, 'a', invalidLength);
+            await setInputTextAndCheck(input, 'this-application-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
             await input.cancel();
         });
     });
