@@ -1,6 +1,7 @@
 import { ViewItem, VSBrowser, WebDriver, ViewSection, Workbench, OutputView, until, By, ActivityBar } from "vscode-extension-tester";
 import { expect } from 'chai';
 import { checkTerminalText } from "../common/util";
+import { views, odoCommands } from "../common/constants";
 
 export function clusterTest(clusterUrl: string) {
     describe('OpenShift Cluster Node', () => {
@@ -10,8 +11,8 @@ export function clusterTest(clusterUrl: string) {
 
         before(async () => {
             driver = VSBrowser.instance.driver;
-            const view = await new ActivityBar().getViewControl('OpenShift').openView();
-            explorer = await view.getContent().getSection('openshift application explorer');
+            const view = await new ActivityBar().getViewControl(views.CONTAINER_TITLE).openView();
+            explorer = await view.getContent().getSection(views.VIEW_TITLE);
             clusterNode = await explorer.findItem(clusterUrl);
         });
 
@@ -19,33 +20,33 @@ export function clusterTest(clusterUrl: string) {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('List Catalog Components');
-            await checkTerminalText('odo catalog list components');
+            await checkTerminalText(odoCommands.listCatalogComponents());
         });
 
         it('List Catalog Components works from command palette', async function() {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift catalog components');
-            await checkTerminalText('odo catalog list components');
+            await checkTerminalText(odoCommands.listCatalogComponents());
         });
 
         it('List Catalog Services works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('List Catalog Services');
-            await checkTerminalText('odo catalog list services');
+            await checkTerminalText(odoCommands.listCatalogServices());
         });
 
         it('List Catalog Services works from command palette', async function() {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift catalog services');
-            await checkTerminalText('odo catalog list services');
+            await checkTerminalText(odoCommands.listCatalogServices());
         });
 
         it('About works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
             await menu.select('About');
-            await checkTerminalText('odo version');
+            await checkTerminalText(odoCommands.printOdoVersion());
         });
 
         it('Show Output Channel works from command palette', async function() {
@@ -62,7 +63,7 @@ export function clusterTest(clusterUrl: string) {
         it('About works from command palette', async function() {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift about');
-            await checkTerminalText('odo version');
+            await checkTerminalText(odoCommands.printOdoVersion());
         });
 
         it('Show Output Channel works from context menu', async function() {

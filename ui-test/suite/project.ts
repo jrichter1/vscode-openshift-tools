@@ -1,7 +1,8 @@
 import { ViewSection, ViewItem, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
 import { setInputTextAndConfirm, findNotification, setInputTextAndCheck, verifyNodeDeletion } from "../common/util";
-import { nodeHasNewChildren, NAME_EXISTS } from "../common/conditions";
+import { nodeHasNewChildren } from "../common/conditions";
 import { expect } from 'chai';
+import { validation, views, ItemType, notifications } from "../common/constants";
 
 export function projectTest(clusterUrl: string) {
     describe('OpenShift Project', () => {
@@ -12,8 +13,8 @@ export function projectTest(clusterUrl: string) {
         const projectName1 = 'test-project1';
 
         before(async () => {
-            const view = await new ActivityBar().getViewControl('OpenShift').openView();
-            explorer = await view.getContent().getSection('openshift application explorer');
+            const view = await new ActivityBar().getViewControl(views.CONTAINER_TITLE).openView();
+            explorer = await view.getContent().getSection(views.VIEW_TITLE);
             clusterNode = await explorer.findItem(clusterUrl);
         });
 
@@ -23,7 +24,7 @@ export function projectTest(clusterUrl: string) {
             await menu.select('New Project');
 
             await handleNewProject(projectName, clusterNode);
-            const notification = await findNotification(`Project '${projectName}' successfully created`);
+            const notification = await findNotification(notifications.itemCreated(ItemType.project, projectName));
             expect(notification).not.undefined;
         });
 
@@ -32,7 +33,7 @@ export function projectTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new project');
 
             await handleNewProject(projectName1, clusterNode);
-            const notification = await findNotification(`Project '${projectName1}' successfully created`);
+            const notification = await findNotification(notifications.itemCreated(ItemType.project, projectName1));
             expect(notification).not.undefined;
         });
 
@@ -41,7 +42,7 @@ export function projectTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new project');
 
             const input = await new InputBox().wait(3000);
-            await setInputTextAndCheck(input, projectName, NAME_EXISTS);
+            await setInputTextAndCheck(input, projectName, validation.NAME_EXISTS);
             await input.cancel();
         });
 
@@ -49,7 +50,7 @@ export function projectTest(clusterUrl: string) {
             this.timeout(30000);
             const project = await clusterNode.findChildItem(projectName);
             await project.openContextMenu().then((menu) => { menu.select('Delete'); });
-            await verifyNodeDeletion(projectName, clusterNode, 'Project', 20000);
+            await verifyNodeDeletion(projectName, clusterNode, ItemType.project, 20000);
         });
 
         it('Project can be deleted via command palette', async function() {
@@ -57,21 +58,19 @@ export function projectTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift delete project');
             const input = await new InputBox().wait(3000);
             await input.selectQuickPick(projectName1);
-            await verifyNodeDeletion(projectName1, clusterNode, 'Project', 20000);
+            await verifyNodeDeletion(projectName1, clusterNode, ItemType.project, 20000);
         });
 
         it('Project name is being validated', async function() {
             this.timeout(15000);
-            const invalidName = 'Not a valid Project name';
-            const invalidLength = 'Project name should be between 2-63 characters';
             await new Workbench().executeCommand('openshift new project');
 
             const input = await new InputBox().wait(3000);
-            await setInputTextAndCheck(input, '1project', invalidName);
-            await setInputTextAndCheck(input, 'Project', invalidName);
-            await setInputTextAndCheck(input, '-$@project', invalidName);
-            await setInputTextAndCheck(input, 'p', invalidLength);
-            await setInputTextAndCheck(input, 'this-project-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
+            await setInputTextAndCheck(input, '1project', validation.invalidName(ItemType.project));
+            await setInputTextAndCheck(input, 'Project', validation.invalidName(ItemType.project));
+            await setInputTextAndCheck(input, '-$@project', validation.invalidName(ItemType.project));
+            await setInputTextAndCheck(input, 'p', validation.invalidLength(ItemType.project));
+            await setInputTextAndCheck(input, 'this-project-is-definitely-going-to-be-longer-than-63-characters', validation.invalidLength(ItemType.project));
             await input.cancel();
         });
     });

@@ -5,6 +5,7 @@ import { Platform } from "../../src/util/platform";
 import * as path from 'path';
 import { viewHasNoProgress, notificationExists, viewHasItems, inputHasNewMessage } from "../common/conditions";
 import { findNotification, setInputTextAndConfirm, quickPick } from "../common/util";
+import { views, notifications } from "../common/constants";
 
 export function loginTest(clusterUrl: string) {
     const username = process.env.OPENSHIFT_USERNAME ? process.env.OPENSHIFT_USERNAME : 'developer';
@@ -18,23 +19,23 @@ export function loginTest(clusterUrl: string) {
 
         before(async () => {
             driver = VSBrowser.instance.driver;
-            view = await new ActivityBar().getViewControl('OpenShift').openView();
-            explorer = await view.getContent().getSection('openshift application explorer');
+            view = await new ActivityBar().getViewControl(views.CONTAINER_TITLE).openView();
+            explorer = await view.getContent().getSection(views.VIEW_TITLE);
         });
 
         it('First ever credentials login works', async function () {
             this.timeout(150000);
-            await driver.wait(() => { return notificationExists('Cannot find OpenShift Do'); }, 15000);
+            await driver.wait(() => { return notificationExists(notifications.ODO_NOT_FOUND); }, 15000);
 
             await driver.actions().mouseMove(explorer).perform();
-            await explorer.getAction('Log in to cluster').click();
+            await explorer.getAction(views.LOGIN).click();
 
             // download ODO
-            const odoNotification = await driver.wait(() => { return notificationExists('Cannot find OpenShift Do'); }, 15000);
+            const odoNotification = await driver.wait(() => { return notificationExists(notifications.ODO_NOT_FOUND); }, 15000);
             await clickDownload(odoNotification);
 
             // download OKD
-            const okdNotification = await driver.wait(() => { return notificationExists('Cannot find OKD'); }, 2000);
+            const okdNotification = await driver.wait(() => { return notificationExists(notifications.OKD_NOT_FOUND); }, 2000);
             await clickDownload(okdNotification);
 
             await driver.wait(until.elementLocated(By.className('quick-input-widget')), 10000);
@@ -44,7 +45,7 @@ export function loginTest(clusterUrl: string) {
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
             // Save the credentials the first time around
-            const saveNotification = await findNotification('Do you want to save username and password?');
+            const saveNotification = await findNotification(notifications.SAVE_LOGIN);
             if (saveNotification) {
                 await saveNotification.takeAction('Yes');
             }
@@ -58,7 +59,7 @@ export function loginTest(clusterUrl: string) {
         it('Relogging in to the cluster works with saved credentials', async function() {
             this.timeout(120000);
             await driver.actions().mouseMove(explorer).perform();
-            await explorer.getAction('Log in to cluster').click();
+            await explorer.getAction(views.LOGIN).click();
             await confirmLogout(driver);
 
             await credentialsLogin(clusterUrl);
@@ -77,7 +78,7 @@ export function loginTest(clusterUrl: string) {
                 userToken = output.toString().trim();
             }
             await driver.actions().mouseMove(explorer).perform();
-            await explorer.getAction('Log in to cluster').click();
+            await explorer.getAction(views.LOGIN).click();
             await confirmLogout(driver);
 
             const input = await new InputBox().wait(3000);
@@ -114,7 +115,7 @@ export function loginTest(clusterUrl: string) {
 }
 
 async function confirmLogout(driver: WebDriver) {
-    const loginNotification = await driver.wait(() => { return notificationExists('You are already logged in'); }, 5000);
+    const loginNotification = await driver.wait(() => { return notificationExists(notifications.LOGGED_IN); }, 5000);
     await loginNotification.takeAction('Yes');
 }
 
@@ -145,7 +146,7 @@ async function credentialsLogin(url: string, user?: string, password?: string) {
 async function clickDownload(notification: Notification): Promise<void> {
     let actionText: string;
     for (const button of await notification.getActions()) {
-        if (button.getTitle().indexOf('Download and install') > -1) {
+        if (button.getTitle().indexOf(notifications.DOWNLOAD) > -1) {
             actionText = button.getTitle();
             break;
         }

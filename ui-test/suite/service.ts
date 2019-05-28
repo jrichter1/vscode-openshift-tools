@@ -1,7 +1,8 @@
-import { ViewItem, WebDriver, VSBrowser, ActivityBar, InputBox, Workbench } from "vscode-extension-tester";
-import { createProject, createApplication, createComponentFromGit, deleteProject, quickPick, setInputTextAndConfirm, findNotification, selectApplication, verifyNodeDeletion, checkTerminalText } from "../common/util";
+import { ViewItem, ActivityBar, InputBox, Workbench } from "vscode-extension-tester";
+import { createProject, createApplication, createComponentFromGit, deleteProject, quickPick, setInputTextAndConfirm, findNotification, selectApplication, verifyNodeDeletion, checkTerminalText, setInputTextAndCheck } from "../common/util";
 import { expect } from 'chai';
-import { nodeHasNewChildren } from "../common/conditions";
+import { nodeHasNewChildren, notificationExists } from "../common/conditions";
+import { validation, GIT_REPO, views, ItemType, odoCommands, notifications } from "../common/constants";
 
 export function serviceTest(clusterUrl: string) {
     describe('OpenShift Service', () => {
@@ -11,7 +12,6 @@ export function serviceTest(clusterUrl: string) {
 
         const projectName = 'service-test-project';
         const appName = 'service-test-app';
-        const gitRepo = 'https://github.com/sclorg/nodejs-ex';
         const componentName = 'service-test-component';
         const serviceType = 'mongodb-persistent';
         const serviceName = 'service';
@@ -19,12 +19,12 @@ export function serviceTest(clusterUrl: string) {
 
         before(async function() {
             this.timeout(50000);
-            const view = await new ActivityBar().getViewControl('OpenShift').openView();
-            const explorer = await view.getContent().getSection('openshift application explorer');
+            const view = await new ActivityBar().getViewControl(views.CONTAINER_TITLE).openView();
+            const explorer = await view.getContent().getSection(views.VIEW_TITLE);
             clusterNode = await explorer.findItem(clusterUrl);
             await createProject(projectName, clusterNode, 15000);
             application = await createApplication(appName, projectName, clusterNode, 10000);
-            component = await createComponentFromGit(componentName, gitRepo, appName, projectName, clusterNode, 25000);
+            component = await createComponentFromGit(componentName, GIT_REPO, appName, projectName, clusterNode, 25000);
         });
 
         after(async function() {
@@ -42,12 +42,53 @@ export function serviceTest(clusterUrl: string) {
             await verifyService(serviceName, application, items);
         });
 
+        it('Duplicate service name is not allowed', async function() {
+            this.timeout(30000);
+            const menu = await application.openContextMenu();
+            await menu.select('New Service');
+
+            const input = await new InputBox().wait(3000);
+            await quickPick(serviceType, true);
+            await setInputTextAndCheck(input, serviceName, validation.NAME_EXISTS);
+            await input.cancel();
+        });
+
+        it('Service name is being validated', async function() {
+            this.timeout(60000);
+            const menu = await application.openContextMenu();
+            await menu.select('New Service');
+
+            const input = await new InputBox().wait(3000);
+            await quickPick(serviceType, true);
+
+            await setInputTextAndCheck(input, '1serv', validation.invalidName(ItemType.service));
+            await setInputTextAndCheck(input, 'a@p#p%', validation.invalidName(ItemType.service));
+            await setInputTextAndCheck(input, 'Service', validation.invalidName(ItemType.service));
+            await setInputTextAndCheck(input, 's', validation.invalidLength(ItemType.service));
+            await setInputTextAndCheck(input, 'this-service-is-definitely-going-to-be-longer-than-63-characters-really', validation.invalidLength(ItemType.service));
+            await input.cancel();
+        });
+
+        it('Service can be linked to a component from context menu', async function() {
+            this.timeout(120000);
+            const menu = await component.openContextMenu();
+            await menu.select('Link Service');
+
+            const input = await new InputBox().wait(3000);
+            expect(await input.getPlaceHolder()).has.string('Select the service to link');
+            await quickPick(serviceName);
+
+            await component.getDriver().wait(() => {
+                return notificationExists(`Service '${serviceName}' successfully linked with Component '${componentName}'`); },
+            60000);
+        });
+
         it('Describe works from context menu', async function() {
             this.timeout(30000);
             const service = await application.findChildItem(serviceName);
             const menu = await service.openContextMenu();
             await menu.select('Describe');
-            await checkTerminalText(`odo catalog describe service ${serviceType}`);
+            await checkTerminalText(odoCommands.describeService(serviceType));
         });
 
         it('Describe works from command palette', async function() {
@@ -56,7 +97,7 @@ export function serviceTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(serviceName);
 
-            await checkTerminalText(`odo catalog describe service ${serviceType}`);
+            await checkTerminalText(odoCommands.describeService(serviceType));
         });
 
         it('Service can be deleted from context menu', async function() {
@@ -65,7 +106,7 @@ export function serviceTest(clusterUrl: string) {
             const menu = await service.openContextMenu();
             await menu.select('Delete');
 
-            await verifyNodeDeletion(serviceName, application, 'Service', 80000);
+            await verifyNodeDeletion(serviceName, application, ItemType.service, 80000);
         });
 
         it('New Service can be created from command palette', async function() {
@@ -79,13 +120,25 @@ export function serviceTest(clusterUrl: string) {
             await verifyService(serviceName1, application, items);
         });
 
-        it('Service can be deleted from commande palette', async function() {
+        it('Service can be linked to a component from command palette', async function() {
+            this.timeout(120000);
+            await new Workbench().executeCommand('openshift link service');
+            await selectApplication(projectName, appName);
+            await quickPick(componentName);
+            await quickPick(serviceName1);
+
+            await component.getDriver().wait(() => {
+                return notificationExists(`Service '${serviceName1}' successfully linked with Component '${componentName}'`); },
+            60000);
+        });
+
+        it('Service can be deleted from command palette', async function() {
             this.timeout(90000);
             await new Workbench().executeCommand('openshift delete service');
             await selectApplication(projectName, appName);
             await quickPick(serviceName1);
 
-            await verifyNodeDeletion(serviceName1, application, 'Service', 80000);
+            await verifyNodeDeletion(serviceName1, application, ItemType.service, 80000);
         });
     });
 }
@@ -98,19 +151,12 @@ async function createService(type: string, name: string) {
     await setInputTextAndConfirm(name);
 }
 
-async function verifyService(name: string, application: ViewItem, initItems: ViewItem[], del: boolean = false) {
+async function verifyService(name: string, application: ViewItem, initItems: ViewItem[]) {
     const driver = application.getDriver();
     const items = (await driver.wait(() => { return nodeHasNewChildren(application, initItems); }, 180000)).map((item) => {
         return item.getLabel();
     });
-    let message: string;
-    if (del) {
-        message = `Service '${name}' successfully deleted`;
-        expect(items).not.contains(name);
-    } else {
-        message = `Service '${name}' successfully created`;
-        expect(items).contains(name);
-    }
-    const notification = await findNotification(message);
+    expect(items).contains(name);
+    const notification = await findNotification(notifications.itemCreated(ItemType.service, name));
     expect(notification).not.undefined;
 }

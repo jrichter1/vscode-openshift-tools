@@ -9,6 +9,7 @@ import * as cluster from './suite/cluster';
 import * as application from './suite/application';
 import * as component from './suite/component';
 import * as service from './suite/service';
+import { views } from './common/constants';
 
 describe('System tests', () => {
     const clusterUrl = process.env.OPENSHIFT_CLUSTER_URL;
@@ -33,37 +34,37 @@ describe('System tests', () => {
     });
 
     it('OpenShift view should be available', async () => {
-        const views = await new ActivityBar().getViewControls();
+        const viewItems = await new ActivityBar().getViewControls();
         let osView: ViewControl;
-        osView = views.find((view) => {
-            return (view.getTitle() === 'OpenShift');
+        osView = viewItems.find((view) => {
+            return (view.getTitle() === views.CONTAINER_TITLE);
         });
 
         expect(osView).not.undefined;
     });
 
     it('OpenShift view should open the OS application explorer', async () => {
-        const view = await new ActivityBar().getViewControl('OpenShift').openView();
+        const view = await new ActivityBar().getViewControl(views.CONTAINER_TITLE).openView();
         const title = await view.getTitlePart().getTitle();
 
-        expect(title.toLowerCase()).equals('openshift');
+        expect(title.toLowerCase()).equals(views.CONTAINER_TITLE.toLowerCase());
     });
 
     it('Login and Refresh buttons are available', async () => {
-        await new ActivityBar().getViewControl('OpenShift').openView();
-        const section = await new SideBarView().getContent().getSection('openshift application explorer');
+        await new ActivityBar().getViewControl(views.CONTAINER_TITLE).openView();
+        const section = await new SideBarView().getContent().getSection(views.VIEW_TITLE);
         const buttons = await section.getActions();
 
         expect(buttons.length).equals(2);
-        expect(buttons[0].getLabel()).equals('Log in to cluster');
-        expect(buttons[1].getLabel()).equals('Refresh View');
+        expect(buttons[0].getLabel()).equals(views.LOGIN);
+        expect(buttons[1].getLabel()).equals(views.REFRESH);
     });
 
     login.loginTest(clusterUrl);
-    cluster.clusterTest(clusterUrl);
-    project.projectTest(clusterUrl);
-    application.applicationTest(clusterUrl);
-    component.componentTest(clusterUrl);
+    // cluster.clusterTest(clusterUrl);
+    // project.projectTest(clusterUrl);
+    // application.applicationTest(clusterUrl);
+    // component.componentTest(clusterUrl);
     service.serviceTest(clusterUrl);
 });
 

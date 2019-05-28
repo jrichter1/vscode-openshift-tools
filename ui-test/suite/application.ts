@@ -1,7 +1,8 @@
 import { ViewItem, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
 import { createProject, checkTerminalText, deleteProject, setInputTextAndCheck, quickPick, findNotification, verifyNodeDeletion } from "../common/util";
 import { expect } from 'chai';
-import { nodeHasNewChildren, NAME_EXISTS } from "../common/conditions";
+import { nodeHasNewChildren } from "../common/conditions";
+import { views, validation, ItemType, notifications, odoCommands } from "../common/constants";
 
 export function applicationTest(clusterUrl: string) {
     let clusterNode: ViewItem;
@@ -13,8 +14,8 @@ export function applicationTest(clusterUrl: string) {
     describe('OpenShift Application', () => {
         before(async function() {
             this.timeout(20000);
-            const view = await new ActivityBar().getViewControl('OpenShift').openView();
-            const explorer = await view.getContent().getSection('openshift application explorer');
+            const view = await new ActivityBar().getViewControl(views.CONTAINER_TITLE).openView();
+            const explorer = await view.getContent().getSection(views.VIEW_TITLE);
             clusterNode = await explorer.findItem(clusterUrl);
 
             await createProject(projectName, clusterNode);
@@ -34,7 +35,7 @@ export function applicationTest(clusterUrl: string) {
             await menu.select('New Application');
             await verifyAppCreation(appName, project);
 
-            const notification = findNotification(`Application '${appName}' successfully created`);
+            const notification = findNotification(notifications.itemCreated(ItemType.application, appName));
             expect(notification).not.undefined;
         });
 
@@ -45,7 +46,7 @@ export function applicationTest(clusterUrl: string) {
             await quickPick(projectName1, true);
             await verifyAppCreation(appName1, project);
 
-            const notification = findNotification(`Application '${appName1}' successfully created`);
+            const notification = findNotification(notifications.itemCreated(ItemType.application, appName1));
             expect(notification).not.undefined;
         });
 
@@ -55,7 +56,7 @@ export function applicationTest(clusterUrl: string) {
             await quickPick(projectName1, true);
 
             const input = await new InputBox().wait(3000);
-            await setInputTextAndCheck(input, appName1, NAME_EXISTS);
+            await setInputTextAndCheck(input, appName1, validation.NAME_EXISTS);
             await input.cancel();
         });
 
@@ -66,7 +67,7 @@ export function applicationTest(clusterUrl: string) {
             const menu = await application.openContextMenu();
             await menu.select('Describe');
 
-            await checkTerminalText(`odo app describe ${appName} --project ${projectName}`);
+            await checkTerminalText(odoCommands.describeApplication(projectName, appName));
         });
 
         it('Describe works from command palette', async function() {
@@ -75,7 +76,7 @@ export function applicationTest(clusterUrl: string) {
             await quickPick(projectName1, true);
             await quickPick(appName1);
 
-            await checkTerminalText(`odo app describe ${appName1} --project ${projectName1}`);
+            await checkTerminalText(odoCommands.describeApplication(projectName1, appName1));
         });
 
         it('Application can be deleted from context menu', async function() {
@@ -84,7 +85,7 @@ export function applicationTest(clusterUrl: string) {
             const application = await project.findChildItem(appName);
             const menu = await application.openContextMenu();
             await menu.select('Delete');
-            await verifyNodeDeletion(appName, project, 'Application', 15000);
+            await verifyNodeDeletion(appName, project, ItemType.application, 15000);
         });
 
         it('Application can be deleted from command palette', async function() {
@@ -93,22 +94,20 @@ export function applicationTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift delete application');
             await quickPick(projectName1, true);
             await quickPick(appName1);
-            await verifyNodeDeletion(appName1, project, 'Application', 15000);
+            await verifyNodeDeletion(appName1, project, ItemType.application, 15000);
         });
 
         it('Application name is being validated', async function() {
             this.timeout(20000);
-            const invalidName = 'Not a valid Application name';
-            const invalidLength = 'Application name should be between 2-63 characters';
             new Workbench().executeCommand('openshift new application');
             await quickPick(projectName, true);
 
             const input = await new InputBox().wait(3000);
-            await setInputTextAndCheck(input, '1app', invalidName);
-            await setInputTextAndCheck(input, 'a@p#p%', invalidName);
-            await setInputTextAndCheck(input, 'App', invalidName);
-            await setInputTextAndCheck(input, 'a', invalidLength);
-            await setInputTextAndCheck(input, 'this-application-is-definitely-going-to-be-longer-than-63-characters', invalidLength);
+            await setInputTextAndCheck(input, '1app', validation.invalidName(ItemType.application));
+            await setInputTextAndCheck(input, 'a@p#p%', validation.invalidName(ItemType.application));
+            await setInputTextAndCheck(input, 'App', validation.invalidName(ItemType.application));
+            await setInputTextAndCheck(input, 'a', validation.invalidLength(ItemType.application));
+            await setInputTextAndCheck(input, 'this-application-is-definitely-going-to-be-longer-than-63-characters', validation.invalidLength(ItemType.application));
             await input.cancel();
         });
     });
@@ -119,7 +118,7 @@ async function verifyAppCreation(appName: string, project: ViewItem) {
     expect(await input.getMessage()).has.string('Provide Application name');
     await input.setText(appName);
     await input.confirm();
-    const apps = await project.getDriver().wait(() => { return nodeHasNewChildren(project); }, 5000);
+    const apps = await project.getDriver().wait(() => { return nodeHasNewChildren(project); }, 6000);
 
     const names = [];
     for (const app of apps) {

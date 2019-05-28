@@ -1,7 +1,5 @@
 import { Workbench, NotificationType, SideBarView, TerminalView, InputBox, ViewItem, ViewSection, Input } from "vscode-extension-tester";
 
-export const NAME_EXISTS = `This name is already used, please enter different name.`;
-
 export async function notificationExists(message: string) {
     try {
         const center = await new Workbench().openNotificationsCenter();
