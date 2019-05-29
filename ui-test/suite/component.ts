@@ -1,5 +1,5 @@
 import { ViewItem, ViewSection, WebDriver, VSBrowser, InputBox, Workbench, DialogHandler, ActivityBar } from "vscode-extension-tester";
-import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setInputTextAndCheck, checkTerminalText, verifyNodeDeletion, selectApplication, findNotification } from "../common/util";
+import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setInputTextAndCheck, checkTerminalText, verifyNodeDeletion, selectApplication, findNotification, validateName } from "../common/util";
 import { nodeHasNewChildren, notificationExists, inputHasQuickPicks } from "../common/conditions";
 import * as path from 'path';
 import { Archive } from '../../src/util/archive';
@@ -123,16 +123,10 @@ export function componentTest(clusterUrl: string) {
             this.timeout(60000);
             await new Workbench().executeCommand('openshift new component from local folder');
 
-            const input = await new InputBox().wait();
             await selectApplication(projectName, appName);
             await quickPick('nodejs-ex', true);
 
-            await setInputTextAndCheck(input, '1comp', validation.invalidName(ItemType.component));
-            await setInputTextAndCheck(input, 'a@p#p%', validation.invalidName(ItemType.component));
-            await setInputTextAndCheck(input, 'Component', validation.invalidName(ItemType.component));
-            await setInputTextAndCheck(input, 'c', validation.invalidLength(ItemType.component));
-            await setInputTextAndCheck(input, 'this-component-is-definitely-going-to-be-longer-than-63-characters', validation.invalidLength(ItemType.component));
-            await input.cancel();
+            await validateName(ItemType.component);
         });
 
         it('Describe works from context menu', async function() {

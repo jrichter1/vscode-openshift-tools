@@ -40,8 +40,8 @@ export class Url extends OpenShiftItem{
             if (port) {
                 return Progress.execFunctionWithProgress(`Creating a URL '${urlName}' for the Component '${component.getName()}'`,
                     () => Url.odo.createComponentCustomUrl(component, `${urlName}`, `${port['port']}`)
-                        .then(() => `URL '${urlName}' for component '${component.getName()}' successfully created`)
-                        .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for component '${component.getName()}'. ${err.message}`))
+                        .then(() => `URL '${urlName}' for Component '${component.getName()}' successfully created`)
+                        .catch((err) => Promise.reject(`Failed to create URL '${urlName}' for Component '${component.getName()}'. ${err.message}`))
                 );
             }
         }
@@ -55,7 +55,7 @@ export class Url extends OpenShiftItem{
             "From which Application you want to delete URL",
             "From which Component you want to delete URL");
         if (!url && component) {
-            url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to delete from the component ${component.getName()}`});
+            url = await window.showQuickPick(Url.odo.getRoutes(component), {placeHolder: `Select the URL to delete from the Component ${component.getName()}`});
         }
         if (url) {
             const value = await window.showWarningMessage(`Do you want to delete URL '${url.getName()}' from Component '${url.getParent().getName()}'?`, 'Yes', 'Cancel');

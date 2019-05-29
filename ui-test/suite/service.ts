@@ -1,5 +1,5 @@
 import { ViewItem, ActivityBar, InputBox, Workbench } from "vscode-extension-tester";
-import { createProject, createApplication, createComponentFromGit, deleteProject, quickPick, setInputTextAndConfirm, findNotification, selectApplication, verifyNodeDeletion, checkTerminalText, setInputTextAndCheck } from "../common/util";
+import { createProject, createApplication, createComponentFromGit, deleteProject, quickPick, setInputTextAndConfirm, findNotification, selectApplication, verifyNodeDeletion, checkTerminalText, setInputTextAndCheck, validateName } from "../common/util";
 import { expect } from 'chai';
 import { nodeHasNewChildren, notificationExists } from "../common/conditions";
 import { validation, GIT_REPO, views, ItemType, odoCommands, notifications } from "../common/constants";
@@ -57,16 +57,9 @@ export function serviceTest(clusterUrl: string) {
             this.timeout(60000);
             const menu = await application.openContextMenu();
             await menu.select('New Service');
-
-            const input = await new InputBox().wait(3000);
             await quickPick(serviceType, true);
 
-            await setInputTextAndCheck(input, '1serv', validation.invalidName(ItemType.service));
-            await setInputTextAndCheck(input, 'a@p#p%', validation.invalidName(ItemType.service));
-            await setInputTextAndCheck(input, 'Service', validation.invalidName(ItemType.service));
-            await setInputTextAndCheck(input, 's', validation.invalidLength(ItemType.service));
-            await setInputTextAndCheck(input, 'this-service-is-definitely-going-to-be-longer-than-63-characters-really', validation.invalidLength(ItemType.service));
-            await input.cancel();
+            await validateName(ItemType.service);
         });
 
         it('Service can be linked to a component from context menu', async function() {

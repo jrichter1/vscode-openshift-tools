@@ -111,7 +111,12 @@ export async function verifyNodeDeletion(nodeName: string, parent: ViewItem, typ
         return notificationExists(notifications.deleteItem(type, nodeName));
     });
     await confirmation.takeAction('Yes');
-    await driver.wait(() => { return notificationExists(notifications.itemDeleted(type, nodeName)); }, (timeout > 3000) ? timeout - 2000 : 2000);
+
+    let message = notifications.itemDeleted(type, nodeName);
+    if (type === ItemType.storage || type === ItemType.url) {
+        message = notifications.itemFromComponentDeleted(nodeName, type, await parent.getLabel());
+    }
+    await driver.wait(() => { return notificationExists(message); }, (timeout > 3000) ? timeout - 2000 : 2000);
     let items: ViewItem[];
     try {
         items = await driver.wait(() => { return nodeHasNewChildren(parent, initItems); }, 2000);
@@ -126,4 +131,14 @@ export async function verifyNodeDeletion(nodeName: string, parent: ViewItem, typ
 export async function selectApplication(projectName: string, appName: string) {
     await quickPick(projectName, true);
     await quickPick(appName);
+}
+
+export async function validateName(type: ItemType) {
+    const input = await new InputBox().wait(3000);
+    await setInputTextAndCheck(input, '1name', validation.invalidName(type));
+    await setInputTextAndCheck(input, 'n@m3#%', validation.invalidName(type));
+    await setInputTextAndCheck(input, 'Name', validation.invalidName(type));
+    await setInputTextAndCheck(input, 'n', validation.invalidLength(type));
+    await setInputTextAndCheck(input, 'this-name-is-definitely-going-to-be-longer-than-63-characters-really', validation.invalidLength(type));
+    await input.cancel();
 }

@@ -32,10 +32,19 @@ export namespace notifications {
         return `${type} '${name}' successfully deleted`;
     }
     export function deleteItem(type: ItemType, name: string) {
-        return `Do you want to delete ${type} '${name}'?`;
+        return `Do you want to delete ${type} '${name}'`;
     }
     export function itemsLinked(fromItem: string, fromType: ItemType, toItem: string) {
         return `${fromType} '${fromItem}' successfully linked with ${ItemType.component} '${toItem}'`;
+    }
+    export function storageCreated(name: string, componentName: string) {
+        return `${itemCreated(ItemType.storage, name)} for ${ItemType.component} '${componentName}'`;
+    }
+    export function itemFromComponentDeleted(name: string, type: ItemType, componentName: string) {
+        return `${type} '${name}' from ${ItemType.component} '${componentName}' successfully deleted`;
+    }
+    export function urlCreated(name: string, component: string) {
+        return `${ItemType.url} '${name}' for ${ItemType.component} '${component}' successfully created`;
     }
 }
 

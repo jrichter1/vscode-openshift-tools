@@ -3,13 +3,15 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import { expect } from 'chai';
 import { Platform } from '../src/util/platform';
+import { views } from './common/constants';
 import * as login from './suite/login';
 import * as project from './suite/project';
 import * as cluster from './suite/cluster';
 import * as application from './suite/application';
 import * as component from './suite/component';
 import * as service from './suite/service';
-import { views } from './common/constants';
+import * as storage from './suite/storage';
+import * as url from './suite/url';
 
 describe('System tests', () => {
     const clusterUrl = process.env.OPENSHIFT_CLUSTER_URL;
@@ -61,11 +63,13 @@ describe('System tests', () => {
     });
 
     login.loginTest(clusterUrl);
-    // cluster.clusterTest(clusterUrl);
-    // project.projectTest(clusterUrl);
-    // application.applicationTest(clusterUrl);
-    // component.componentTest(clusterUrl);
+    cluster.clusterTest(clusterUrl);
+    project.projectTest(clusterUrl);
+    application.applicationTest(clusterUrl);
+    component.componentTest(clusterUrl);
     service.serviceTest(clusterUrl);
+    storage.storageTest(clusterUrl);
+    url.urlTest(clusterUrl);
 });
 
 async function openFolder(path: string) {

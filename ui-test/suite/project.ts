@@ -1,5 +1,5 @@
 import { ViewSection, ViewItem, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
-import { setInputTextAndConfirm, findNotification, setInputTextAndCheck, verifyNodeDeletion } from "../common/util";
+import { setInputTextAndConfirm, findNotification, setInputTextAndCheck, verifyNodeDeletion, validateName } from "../common/util";
 import { nodeHasNewChildren } from "../common/conditions";
 import { expect } from 'chai';
 import { validation, views, ItemType, notifications } from "../common/constants";
@@ -65,13 +65,7 @@ export function projectTest(clusterUrl: string) {
             this.timeout(15000);
             await new Workbench().executeCommand('openshift new project');
 
-            const input = await new InputBox().wait(3000);
-            await setInputTextAndCheck(input, '1project', validation.invalidName(ItemType.project));
-            await setInputTextAndCheck(input, 'Project', validation.invalidName(ItemType.project));
-            await setInputTextAndCheck(input, '-$@project', validation.invalidName(ItemType.project));
-            await setInputTextAndCheck(input, 'p', validation.invalidLength(ItemType.project));
-            await setInputTextAndCheck(input, 'this-project-is-definitely-going-to-be-longer-than-63-characters', validation.invalidLength(ItemType.project));
-            await input.cancel();
+            await validateName(ItemType.project);
         });
     });
 }

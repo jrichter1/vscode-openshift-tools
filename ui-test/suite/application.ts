@@ -1,5 +1,5 @@
 import { ViewItem, InputBox, Workbench, ActivityBar } from "vscode-extension-tester";
-import { createProject, checkTerminalText, deleteProject, setInputTextAndCheck, quickPick, findNotification, verifyNodeDeletion } from "../common/util";
+import { createProject, checkTerminalText, deleteProject, setInputTextAndCheck, quickPick, findNotification, verifyNodeDeletion, validateName } from "../common/util";
 import { expect } from 'chai';
 import { nodeHasNewChildren } from "../common/conditions";
 import { views, validation, ItemType, notifications, odoCommands } from "../common/constants";
@@ -102,13 +102,7 @@ export function applicationTest(clusterUrl: string) {
             new Workbench().executeCommand('openshift new application');
             await quickPick(projectName, true);
 
-            const input = await new InputBox().wait(3000);
-            await setInputTextAndCheck(input, '1app', validation.invalidName(ItemType.application));
-            await setInputTextAndCheck(input, 'a@p#p%', validation.invalidName(ItemType.application));
-            await setInputTextAndCheck(input, 'App', validation.invalidName(ItemType.application));
-            await setInputTextAndCheck(input, 'a', validation.invalidLength(ItemType.application));
-            await setInputTextAndCheck(input, 'this-application-is-definitely-going-to-be-longer-than-63-characters', validation.invalidLength(ItemType.application));
-            await input.cancel();
+            await validateName(ItemType.application);
         });
     });
 }
