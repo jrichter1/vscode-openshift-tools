@@ -1,7 +1,7 @@
 import { ViewItem, VSBrowser, WebDriver, ViewSection, Workbench, OutputView, until, By, ActivityBar } from "vscode-extension-tester";
 import { expect } from 'chai';
 import { checkTerminalText } from "../common/util";
-import { views, odoCommands } from "../common/constants";
+import { views, odoCommands, menus } from "../common/constants";
 
 export function clusterTest(clusterUrl: string) {
     describe('OpenShift Cluster Node', () => {
@@ -19,7 +19,7 @@ export function clusterTest(clusterUrl: string) {
         it('List Catalog Components works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
-            await menu.select('List Catalog Components');
+            await menu.select(menus.CATALOG_COMPONENTS);
             await checkTerminalText(odoCommands.listCatalogComponents());
         });
 
@@ -32,7 +32,7 @@ export function clusterTest(clusterUrl: string) {
         it('List Catalog Services works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
-            await menu.select('List Catalog Services');
+            await menu.select(menus.CATALOG_SERVICES);
             await checkTerminalText(odoCommands.listCatalogServices());
         });
 
@@ -45,7 +45,7 @@ export function clusterTest(clusterUrl: string) {
         it('About works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
-            await menu.select('About');
+            await menu.select(menus.ABOUT);
             await checkTerminalText(odoCommands.printOdoVersion());
         });
 
@@ -57,7 +57,7 @@ export function clusterTest(clusterUrl: string) {
 
             await driver.wait(until.elementLocated(By.id('workbench.panel.output')));
             const outputView = await new OutputView().wait();
-            expect(await outputView.getCurrentChannel()).equals('OpenShift');
+            expect(await outputView.getCurrentChannel()).equals(views.CONTAINER_TITLE);
         });
 
         it('About works from command palette', async function() {
@@ -69,12 +69,12 @@ export function clusterTest(clusterUrl: string) {
         it('Show Output Channel works from context menu', async function() {
             this.timeout(10000);
             const menu = await clusterNode.openContextMenu();
-            await menu.select('Show Output Channel');
+            await menu.select(menus.SHOW_OUTPUT);
             await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
 
             await driver.wait(until.elementLocated(By.id('workbench.panel.output')));
             const outputView = await new OutputView().wait();
-            expect(await outputView.getCurrentChannel()).equals('OpenShift');
+            expect(await outputView.getCurrentChannel()).equals(views.CONTAINER_TITLE);
         });
 
         it('Open Console is available', async function() {
@@ -83,7 +83,7 @@ export function clusterTest(clusterUrl: string) {
             const items = (await menu.getItems()).map((value) => {
                 return value.getLabel();
             });
-            expect(items).contains('Open Console');
+            expect(items).contains(menus.OPEN_CONSOLE);
             await menu.close();
 
             const prompt = await new Workbench().openCommandPrompt();

@@ -5,6 +5,30 @@ export namespace views {
     export const LOGIN = 'Log in to cluster';
 }
 
+export namespace menus {
+    export const CATALOG_COMPONENTS = 'List Catalog Components';
+    export const CATALOG_SERVICES = 'List Catalog Servoces';
+    export const ABOUT = 'About';
+    export const SHOW_OUTPUT = 'Show Output Channel';
+    export const OPEN_CONSOLE = 'Open Console';
+
+    export const DESCRIBE = 'Describe';
+    export const DELETE = 'Delete';
+
+    export const SHOW_LOG = 'Show Log';
+    export const FOLLOW_LOG = 'Follow Log';
+    export const WATCH = 'Watch';
+    export const PUSH = 'Push';
+    export const OPEN = 'Open in Browser';
+
+    export function create(type: ItemType) {
+        return `New ${type}`;
+    }
+    export function link(type: ItemType) {
+        return `Link ${type}`;
+    }
+}
+
 export namespace validation {
     export const VALID = 'validtext';
     export const NAME_EXISTS = `This name is already used, please enter different name.`;

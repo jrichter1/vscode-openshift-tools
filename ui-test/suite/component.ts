@@ -4,7 +4,7 @@ import { nodeHasNewChildren, notificationExists, inputHasQuickPicks } from "../c
 import * as path from 'path';
 import { Archive } from '../../src/util/archive';
 import { expect } from 'chai';
-import { validation, GIT_REPO, views, ItemType, notifications, odoCommands } from "../common/constants";
+import { validation, GIT_REPO, views, ItemType, notifications, odoCommands, menus } from "../common/constants";
 
 export function componentTest(clusterUrl: string) {
     describe('OpenShift Component', () => {
@@ -42,7 +42,7 @@ export function componentTest(clusterUrl: string) {
         it('New Component can be created from context menu', async function() {
             this.timeout(60000);
             const menu = await application.openContextMenu();
-            await menu.select('New Component');
+            await menu.select(menus.create(ItemType.component));
 
             const input = await new InputBox().wait();
             const labels = [];
@@ -133,7 +133,7 @@ export function componentTest(clusterUrl: string) {
             this.timeout(30000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
-            await menu.select('Describe');
+            await menu.select(menus.DESCRIBE);
 
             await checkTerminalText(odoCommands.describeComponent(projectName, appName, gitComponentName));
         });
@@ -151,7 +151,7 @@ export function componentTest(clusterUrl: string) {
             this.timeout(30000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
-            await menu.select('Show Log');
+            await menu.select(menus.SHOW_LOG);
 
             await checkTerminalText(odoCommands.showLog(projectName, appName, gitComponentName));
         });
@@ -169,7 +169,7 @@ export function componentTest(clusterUrl: string) {
             this.timeout(30000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
-            await menu.select('Follow Log');
+            await menu.select(menus.FOLLOW_LOG);
 
             await checkTerminalText(odoCommands.showLogAndFollow(projectName, appName, gitComponentName));
         });
@@ -187,7 +187,7 @@ export function componentTest(clusterUrl: string) {
             this.timeout(30000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
-            await menu.select('Watch');
+            await menu.select(menus.WATCH);
 
             await checkTerminalText(odoCommands.watchComponent(projectName, appName, gitComponentName));
         });
@@ -205,7 +205,7 @@ export function componentTest(clusterUrl: string) {
             this.timeout(30000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
-            await menu.select('Push');
+            await menu.select(menus.PUSH);
 
             await checkTerminalText(odoCommands.pushComponent(projectName, appName, gitComponentName));
         });
@@ -227,7 +227,7 @@ export function componentTest(clusterUrl: string) {
                 return item.getLabel();
             });
             await menu.close();
-            expect(items).contains('Open in Browser');
+            expect(items).contains(menus.OPEN);
         });
 
         it('Open in Browser is available from command palette', async function() {
@@ -248,7 +248,7 @@ export function componentTest(clusterUrl: string) {
             this.timeout(60000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
-            await menu.select('Link Component');
+            await menu.select(menus.link(ItemType.component));
             const input = await new InputBox().wait();
             expect(await input.getPlaceHolder()).equals('Select a Component to link');
 
@@ -275,7 +275,7 @@ export function componentTest(clusterUrl: string) {
             this.timeout(60000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
-            await menu.select('Delete');
+            await menu.select(menus.DELETE);
             await verifyNodeDeletion(gitComponentName, application, ItemType.component, 30000);
         });
 

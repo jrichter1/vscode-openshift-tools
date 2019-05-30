@@ -1,5 +1,5 @@
 import { ViewItem, ActivityBar, InputBox, Workbench } from "vscode-extension-tester";
-import { views, GIT_REPO, notifications, validation, ItemType } from "../common/constants";
+import { views, GIT_REPO, notifications, validation, ItemType, menus } from "../common/constants";
 import { createProject, createApplication, createComponentFromGit, deleteProject, setInputTextAndConfirm, findNotification, selectApplication, quickPick, setInputTextAndCheck, validateName, verifyNodeDeletion } from "../common/util";
 import { expect } from 'chai';
 import { nodeHasNewChildren } from "../common/conditions";
@@ -35,7 +35,7 @@ export function urlTest(clusterUrl: string) {
             this.timeout(30000);
             const items = await component.getChildren();
             const menu = await component.openContextMenu();
-            await menu.select('New URL');
+            await menu.select(menus.create(ItemType.url));
 
             await createUrl(urlName);
             await verifyUrl(urlName, component, items);
@@ -55,7 +55,7 @@ export function urlTest(clusterUrl: string) {
         it('Duplicate URL name is not allowed', async function() {
             this.timeout(30000);
             const menu = await component.openContextMenu();
-            await menu.select('New URL');
+            await menu.select(menus.create(ItemType.url));
 
             const input = await new InputBox().wait(3000);
             await setInputTextAndCheck(input, urlName, validation.NAME_EXISTS);
@@ -65,7 +65,7 @@ export function urlTest(clusterUrl: string) {
         it('URL name is being validated', async function() {
             this.timeout(30000);
             const menu = await component.openContextMenu();
-            await menu.select('New URL');
+            await menu.select(menus.create(ItemType.url));
 
             await validateName(ItemType.url);
         });
@@ -84,7 +84,7 @@ export function urlTest(clusterUrl: string) {
             this.timeout(30000);
             const url = await component.findChildItem(urlName);
             const menu = await url.openContextMenu();
-            await menu.select('Delete');
+            await menu.select(menus.DELETE);
 
             await verifyNodeDeletion(urlName, component, ItemType.url, 20000);
         });

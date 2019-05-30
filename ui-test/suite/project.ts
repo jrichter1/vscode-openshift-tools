@@ -2,7 +2,7 @@ import { ViewSection, ViewItem, InputBox, Workbench, ActivityBar } from "vscode-
 import { setInputTextAndConfirm, findNotification, setInputTextAndCheck, verifyNodeDeletion, validateName } from "../common/util";
 import { nodeHasNewChildren } from "../common/conditions";
 import { expect } from 'chai';
-import { validation, views, ItemType, notifications } from "../common/constants";
+import { validation, views, ItemType, notifications, menus } from "../common/constants";
 
 export function projectTest(clusterUrl: string) {
     describe('OpenShift Project', () => {
@@ -21,7 +21,7 @@ export function projectTest(clusterUrl: string) {
         it('New project can be created from context menu', async function() {
             this.timeout(20000);
             const menu = await clusterNode.openContextMenu();
-            await menu.select('New Project');
+            await menu.select(menus.create(ItemType.project));
 
             await handleNewProject(projectName, clusterNode);
             const notification = await findNotification(notifications.itemCreated(ItemType.project, projectName));
@@ -49,7 +49,7 @@ export function projectTest(clusterUrl: string) {
         it('Project can be deleted via context menu', async function() {
             this.timeout(30000);
             const project = await clusterNode.findChildItem(projectName);
-            await project.openContextMenu().then((menu) => { menu.select('Delete'); });
+            await project.openContextMenu().then((menu) => { menu.select(menus.DELETE); });
             await verifyNodeDeletion(projectName, clusterNode, ItemType.project, 20000);
         });
 

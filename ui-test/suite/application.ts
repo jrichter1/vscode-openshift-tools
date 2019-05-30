@@ -2,7 +2,7 @@ import { ViewItem, InputBox, Workbench, ActivityBar } from "vscode-extension-tes
 import { createProject, checkTerminalText, deleteProject, setInputTextAndCheck, quickPick, findNotification, verifyNodeDeletion, validateName } from "../common/util";
 import { expect } from 'chai';
 import { nodeHasNewChildren } from "../common/conditions";
-import { views, validation, ItemType, notifications, odoCommands } from "../common/constants";
+import { views, validation, ItemType, notifications, odoCommands, menus } from "../common/constants";
 
 export function applicationTest(clusterUrl: string) {
     let clusterNode: ViewItem;
@@ -32,7 +32,7 @@ export function applicationTest(clusterUrl: string) {
             this.timeout(20000);
             const project = await clusterNode.findChildItem(projectName);
             const menu = await project.openContextMenu();
-            await menu.select('New Application');
+            await menu.select(menus.create(ItemType.application));
             await verifyAppCreation(appName, project);
 
             const notification = findNotification(notifications.itemCreated(ItemType.application, appName));
@@ -65,7 +65,7 @@ export function applicationTest(clusterUrl: string) {
             const project = await clusterNode.findChildItem(projectName);
             const application = await project.findChildItem(appName);
             const menu = await application.openContextMenu();
-            await menu.select('Describe');
+            await menu.select(menus.DESCRIBE);
 
             await checkTerminalText(odoCommands.describeApplication(projectName, appName));
         });
@@ -84,7 +84,7 @@ export function applicationTest(clusterUrl: string) {
             const project = await clusterNode.findChildItem(projectName);
             const application = await project.findChildItem(appName);
             const menu = await application.openContextMenu();
-            await menu.select('Delete');
+            await menu.select(menus.DELETE);
             await verifyNodeDeletion(appName, project, ItemType.application, 15000);
         });
 

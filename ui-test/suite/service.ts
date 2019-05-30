@@ -2,7 +2,7 @@ import { ViewItem, ActivityBar, InputBox, Workbench } from "vscode-extension-tes
 import { createProject, createApplication, createComponentFromGit, deleteProject, quickPick, setInputTextAndConfirm, findNotification, selectApplication, verifyNodeDeletion, checkTerminalText, setInputTextAndCheck, validateName } from "../common/util";
 import { expect } from 'chai';
 import { nodeHasNewChildren, notificationExists } from "../common/conditions";
-import { validation, GIT_REPO, views, ItemType, odoCommands, notifications } from "../common/constants";
+import { validation, GIT_REPO, views, ItemType, odoCommands, notifications, menus } from "../common/constants";
 
 export function serviceTest(clusterUrl: string) {
     describe('OpenShift Service', () => {
@@ -36,7 +36,7 @@ export function serviceTest(clusterUrl: string) {
             this.timeout(200000);
             const items = await application.getChildren();
             const menu = await application.openContextMenu();
-            await menu.select('New Service');
+            await menu.select(menus.create(ItemType.service));
 
             await createService(serviceType, serviceName);
             await verifyService(serviceName, application, items);
@@ -45,7 +45,7 @@ export function serviceTest(clusterUrl: string) {
         it('Duplicate service name is not allowed', async function() {
             this.timeout(30000);
             const menu = await application.openContextMenu();
-            await menu.select('New Service');
+            await menu.select(menus.create(ItemType.service));
 
             const input = await new InputBox().wait(3000);
             await quickPick(serviceType, true);
@@ -56,7 +56,7 @@ export function serviceTest(clusterUrl: string) {
         it('Service name is being validated', async function() {
             this.timeout(60000);
             const menu = await application.openContextMenu();
-            await menu.select('New Service');
+            await menu.select(menus.create(ItemType.service));
             await quickPick(serviceType, true);
 
             await validateName(ItemType.service);
@@ -65,14 +65,14 @@ export function serviceTest(clusterUrl: string) {
         it('Service can be linked to a component from context menu', async function() {
             this.timeout(120000);
             const menu = await component.openContextMenu();
-            await menu.select('Link Service');
+            await menu.select(menus.link(ItemType.service));
 
             const input = await new InputBox().wait(3000);
             expect(await input.getPlaceHolder()).has.string('Select the service to link');
             await quickPick(serviceName);
 
             await component.getDriver().wait(() => {
-                return notificationExists(`Service '${serviceName}' successfully linked with Component '${componentName}'`); },
+                return notificationExists(notifications.itemsLinked(serviceName, ItemType.service, componentName)); },
             60000);
         });
 
@@ -80,7 +80,7 @@ export function serviceTest(clusterUrl: string) {
             this.timeout(30000);
             const service = await application.findChildItem(serviceName);
             const menu = await service.openContextMenu();
-            await menu.select('Describe');
+            await menu.select(menus.DESCRIBE);
             await checkTerminalText(odoCommands.describeService(serviceType));
         });
 
@@ -97,7 +97,7 @@ export function serviceTest(clusterUrl: string) {
             this.timeout(90000);
             const service = await application.findChildItem(serviceName);
             const menu = await service.openContextMenu();
-            await menu.select('Delete');
+            await menu.select(menus.DELETE);
 
             await verifyNodeDeletion(serviceName, application, ItemType.service, 80000);
         });
@@ -121,7 +121,7 @@ export function serviceTest(clusterUrl: string) {
             await quickPick(serviceName1);
 
             await component.getDriver().wait(() => {
-                return notificationExists(`Service '${serviceName1}' successfully linked with Component '${componentName}'`); },
+                return notificationExists(notifications.itemsLinked(serviceName1, ItemType.service, componentName)); },
             60000);
         });
 
