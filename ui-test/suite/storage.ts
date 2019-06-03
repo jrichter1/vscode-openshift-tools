@@ -60,7 +60,7 @@ export function storageTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select(menus.create(ItemType.storage));
 
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             await setInputTextAndCheck(input, storageName, validation.NAME_EXISTS);
             await input.cancel();
         });

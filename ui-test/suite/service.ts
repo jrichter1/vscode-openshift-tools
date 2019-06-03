@@ -47,7 +47,7 @@ export function serviceTest(clusterUrl: string) {
             const menu = await application.openContextMenu();
             await menu.select(menus.create(ItemType.service));
 
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             await quickPick(serviceType, true);
             await setInputTextAndCheck(input, serviceName, validation.NAME_EXISTS);
             await input.cancel();
@@ -67,7 +67,7 @@ export function serviceTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select(menus.link(ItemType.service));
 
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             expect(await input.getPlaceHolder()).has.string('Select the service to link');
             await quickPick(serviceName);
 
@@ -137,7 +137,7 @@ export function serviceTest(clusterUrl: string) {
 }
 
 async function createService(type: string, name: string) {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     expect(await input.getPlaceHolder()).equals('Service Template Name');
     await quickPick(type, true);
     expect(await input.getMessage()).has.string('Provide Service name');

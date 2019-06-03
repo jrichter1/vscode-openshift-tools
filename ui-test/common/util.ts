@@ -15,7 +15,7 @@ export async function findNotification(message: string): Promise<Notification> {
 }
 
 export async function setInputTextAndConfirm(text?: string, shouldWait: boolean = false) {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     const message = await input.getMessage();
     const holder = await input.getPlaceHolder();
 
@@ -92,7 +92,7 @@ export async function checkTerminalText(expectedText: string, timeout: number = 
 }
 
 export async function quickPick(title: string, shouldWait: boolean = false) {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     const driver = input.getDriver();
     await driver.wait(() => { return inputHasQuickPicks(input); }, 5000);
     const message = await input.getMessage();
@@ -100,7 +100,7 @@ export async function quickPick(title: string, shouldWait: boolean = false) {
     await input.selectQuickPick(title);
 
     if (shouldWait) {
-        await driver.wait(() => { return inputHasNewMessage(input, message, placeHolder); }, 3000);
+        await driver.wait(() => { return inputHasNewMessage(input, message, placeHolder); }, 5000);
     }
 }
 
@@ -134,7 +134,7 @@ export async function selectApplication(projectName: string, appName: string) {
 }
 
 export async function validateName(type: ItemType) {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     await setInputTextAndCheck(input, '1name', validation.invalidName(type));
     await setInputTextAndCheck(input, 'n@m3#%', validation.invalidName(type));
     await setInputTextAndCheck(input, 'Name', validation.invalidName(type));

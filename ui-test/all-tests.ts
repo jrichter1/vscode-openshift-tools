@@ -29,10 +29,11 @@ describe('System tests', () => {
         await openFolder(path.join(resources, 'nodejs-ex'));
     });
 
-    after(() => {
+    after((done) => {
         if (fs.existsSync(kubeBackupPath)) {
             fs.moveSync(kubeBackupPath, kubePath, { overwrite: true });
         }
+        done();
     });
 
     it('OpenShift view should be available', async () => {

@@ -81,7 +81,7 @@ export function loginTest(clusterUrl: string) {
             await explorer.getAction(views.LOGIN).click();
             await confirmLogout(driver);
 
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             await quickPick('Token', true);
             await setInputTextAndConfirm(clusterUrl, true);
 
@@ -121,7 +121,7 @@ async function confirmLogout(driver: WebDriver) {
 
 async function credentialsLogin(url: string, user?: string, password?: string) {
     // select credentials login
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     await input.getDriver().wait(() => { return inputHasNewMessage(input, '', 'a'); }, 2000);
     expect(await input.getPlaceHolder()).equals('Select the way to log in to the cluster.');
     const quickPicks = await input.getQuickPicks();

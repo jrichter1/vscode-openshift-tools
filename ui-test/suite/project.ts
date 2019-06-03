@@ -41,7 +41,7 @@ export function projectTest(clusterUrl: string) {
             this.timeout(10000);
             await new Workbench().executeCommand('openshift new project');
 
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             await setInputTextAndCheck(input, projectName, validation.NAME_EXISTS);
             await input.cancel();
         });
@@ -56,7 +56,7 @@ export function projectTest(clusterUrl: string) {
         it('Project can be deleted via command palette', async function() {
             this.timeout(30000);
             await new Workbench().executeCommand('openshift delete project');
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             await input.selectQuickPick(projectName1);
             await verifyNodeDeletion(projectName1, clusterNode, ItemType.project, 20000);
         });
@@ -71,7 +71,7 @@ export function projectTest(clusterUrl: string) {
 }
 
 async function handleNewProject(projectName: string,  clusterNode: ViewItem) {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     expect(await input.getMessage()).has.string('Provide Project name');
     await setInputTextAndConfirm(projectName);
 

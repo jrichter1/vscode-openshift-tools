@@ -55,7 +55,7 @@ export function applicationTest(clusterUrl: string) {
             await new Workbench().executeCommand('openshift new application');
             await quickPick(projectName1, true);
 
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             await setInputTextAndCheck(input, appName1, validation.NAME_EXISTS);
             await input.cancel();
         });
@@ -108,7 +108,7 @@ export function applicationTest(clusterUrl: string) {
 }
 
 async function verifyAppCreation(appName: string, project: ViewItem) {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     expect(await input.getMessage()).has.string('Provide Application name');
     await input.setText(appName);
     await input.confirm();

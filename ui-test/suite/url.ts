@@ -57,7 +57,7 @@ export function urlTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select(menus.create(ItemType.url));
 
-            const input = await new InputBox().wait(3000);
+            const input = await new InputBox().wait();
             await setInputTextAndCheck(input, urlName, validation.NAME_EXISTS);
             await input.cancel();
         });
@@ -102,7 +102,7 @@ export function urlTest(clusterUrl: string) {
 }
 
 async function createUrl(name: string) {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     expect(await input.getMessage()).has.string('Provide URL name');
     await setInputTextAndConfirm(name);
 }

@@ -7,7 +7,7 @@ export namespace views {
 
 export namespace menus {
     export const CATALOG_COMPONENTS = 'List Catalog Components';
-    export const CATALOG_SERVICES = 'List Catalog Servoces';
+    export const CATALOG_SERVICES = 'List Catalog Services';
     export const ABOUT = 'About';
     export const SHOW_OUTPUT = 'Show Output Channel';
     export const OPEN_CONSOLE = 'Open Console';

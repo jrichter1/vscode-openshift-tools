@@ -290,16 +290,16 @@ export function componentTest(clusterUrl: string) {
 }
 
 async function createComponent(name: string, type: string, typeVersion: string = 'latest') {
-    const input = await new InputBox().wait(3000);
+    const input = await new InputBox().wait();
     const driver = input.getDriver();
     expect(await input.getMessage()).has.string('Provide Component name');
     await setInputTextAndConfirm(name);
 
-    await driver.wait(() => { return inputHasQuickPicks(input); }, 4000);
+    await driver.wait(() => { return inputHasQuickPicks(input); }, 6000);
     expect(await input.getPlaceHolder()).equals('Component type');
     await quickPick(type, true);
 
-    await driver.wait(() => { return inputHasQuickPicks(input); }, 4000);
+    await driver.wait(() => { return inputHasQuickPicks(input); }, 6000);
     expect(await input.getPlaceHolder()).equals('Component type version');
     await quickPick(typeVersion);
 }
