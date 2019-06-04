@@ -12,6 +12,7 @@ import * as component from './suite/component';
 import * as service from './suite/service';
 import * as storage from './suite/storage';
 import * as url from './suite/url';
+import { Archive } from '../src/util/archive';
 
 describe('System tests', () => {
     const clusterUrl = process.env.OPENSHIFT_CLUSTER_URL;
@@ -19,6 +20,7 @@ describe('System tests', () => {
     const toolsPath = path.resolve(Platform.getUserHomePath(), '.vs-openshift');
     const kubePath = path.resolve(Platform.getUserHomePath(), '.kube');
     const kubeBackupPath = path.resolve(Platform.getUserHomePath(), '.kube-backup');
+    const projectZip = path.join(resources, 'nodejs-ex.zip');
 
     before(async function() {
         this.timeout(20000);
@@ -26,6 +28,7 @@ describe('System tests', () => {
         if (fs.existsSync(kubePath)) {
             fs.moveSync(kubePath, kubeBackupPath, { overwrite: true });
         }
+        await Archive.unzip(projectZip, resources);
         await openFolder(path.join(resources, 'nodejs-ex'));
     });
 

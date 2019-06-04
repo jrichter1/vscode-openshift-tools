@@ -2,7 +2,6 @@ import { ViewItem, ViewSection, WebDriver, VSBrowser, InputBox, Workbench, Dialo
 import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setInputTextAndCheck, checkTerminalText, verifyNodeDeletion, selectApplication, findNotification, validateName } from "../common/util";
 import { nodeHasNewChildren, notificationExists, inputHasQuickPicks } from "../common/conditions";
 import * as path from 'path';
-import { Archive } from '../../src/util/archive';
 import { expect } from 'chai';
 import { validation, GIT_REPO, views, ItemType, notifications, odoCommands, menus } from "../common/constants";
 
@@ -14,7 +13,6 @@ export function componentTest(clusterUrl: string) {
         let application: ViewItem;
 
         const resources = path.resolve('ui-test', 'resources');
-        const projectZip = path.join(resources, 'nodejs-ex.zip');
         const testWar = path.join(resources, 'test.war');
 
         const projectName = 'component-test-project';
@@ -31,7 +29,6 @@ export function componentTest(clusterUrl: string) {
             clusterNode = await explorer.findItem(clusterUrl);
             await createProject(projectName, clusterNode, 10000);
             application = await createApplication(appName, projectName, clusterNode, 5000);
-            await Archive.unzip(projectZip, resources);
         });
 
         after(async function() {
