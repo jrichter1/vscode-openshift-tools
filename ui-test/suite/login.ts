@@ -45,9 +45,11 @@ export function loginTest(clusterUrl: string) {
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
             // Save the credentials the first time around
-            const saveNotification = await findNotification(notifications.SAVE_LOGIN);
-            if (saveNotification) {
+            try {
+                const saveNotification = await driver.wait(() => { return notificationExists(notifications.SAVE_LOGIN); }, 5000);
                 await saveNotification.takeAction('Yes');
+            } catch (err) {
+                console.log('Credentials already saved');
             }
 
             // Check that the cluster node is present in the tree view

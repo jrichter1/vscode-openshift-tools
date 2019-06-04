@@ -32,7 +32,7 @@ export function componentTest(clusterUrl: string) {
         });
 
         after(async function() {
-            this.timeout(30000);
+            this.timeout(50000);
             await deleteProject(projectName, clusterNode);
         });
 
@@ -94,7 +94,7 @@ export function componentTest(clusterUrl: string) {
             const initItems = await application.getChildren();
             await new Workbench().executeCommand('openshift new component from binary');
 
-            await selectApplication(projectName, appName);
+            await selectApplication(projectName, appName, false);
 
             const dialog = await DialogHandler.getOpenDialog();
             await dialog.selectPath(testWar);
@@ -204,7 +204,7 @@ export function componentTest(clusterUrl: string) {
             const menu = await component.openContextMenu();
             await menu.select(menus.PUSH);
 
-            await checkTerminalText(odoCommands.pushComponent(projectName, appName, gitComponentName));
+            await checkTerminalText(odoCommands.pushComponent(projectName, appName, gitComponentName), 20000);
         });
 
         it('Push works from command palette', async function() {
@@ -213,7 +213,7 @@ export function componentTest(clusterUrl: string) {
             await selectApplication(projectName, appName);
             await quickPick(localComponentName);
 
-            await checkTerminalText(odoCommands.pushComponent(projectName, appName, localComponentName));
+            await checkTerminalText(odoCommands.pushComponent(projectName, appName, localComponentName), 20000);
         });
 
         it('Open in Browser is available from context menu', async function() {

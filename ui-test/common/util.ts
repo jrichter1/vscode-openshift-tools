@@ -46,7 +46,7 @@ export async function createProject(name: string, cluster: ViewItem, timeout: nu
 export async function deleteProject(name: string, cluster: ViewItem) {
     await new Workbench().executeCommand('openshift delete project');
     await setInputTextAndConfirm(name);
-    await verifyNodeDeletion(name, cluster, ItemType.project, 20000);
+    await verifyNodeDeletion(name, cluster, ItemType.project, 40000);
 }
 
 export async function createApplication(name: string, projectName: string, cluster: ViewItem, timeout: number = 5000) {
@@ -128,9 +128,9 @@ export async function verifyNodeDeletion(nodeName: string, parent: ViewItem, typ
     expect(item).undefined;
 }
 
-export async function selectApplication(projectName: string, appName: string) {
+export async function selectApplication(projectName: string, appName: string, shouldWait: boolean = true) {
     await quickPick(projectName, true);
-    await quickPick(appName);
+    await quickPick(appName, shouldWait);
 }
 
 export async function validateName(type: ItemType) {
