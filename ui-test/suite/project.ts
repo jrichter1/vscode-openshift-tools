@@ -75,7 +75,7 @@ async function handleNewProject(projectName: string,  clusterNode: ViewItem) {
     expect(await input.getMessage()).has.string('Provide Project name');
     await setInputTextAndConfirm(projectName);
 
-    await clusterNode.getDriver().wait(() => { return nodeHasNewChildren(clusterNode); }, 15000);
+    await clusterNode.getDriver().wait(() => { return nodeHasNewChildren(clusterNode); }, 18000);
     const labels = [];
     for (const item of await clusterNode.getChildren()) {
         labels.push(item.getLabel());

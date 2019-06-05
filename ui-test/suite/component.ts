@@ -306,6 +306,6 @@ async function verifyComponent(name: string, application: ViewItem, initItems: V
         return item.getLabel();
     });
     expect(components).contains(name);
-    const notification = findNotification(notifications.itemCreated(ItemType.component, name));
+    const notification = await findNotification(notifications.itemCreated(ItemType.component, name));
     expect(notification).not.undefined;
 }

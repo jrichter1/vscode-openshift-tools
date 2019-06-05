@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import { Platform } from "../../src/util/platform";
 import * as path from 'path';
 import { viewHasNoProgress, notificationExists, viewHasItems, inputHasNewMessage } from "../common/conditions";
-import { findNotification, setInputTextAndConfirm, quickPick } from "../common/util";
+import { setInputTextAndConfirm, quickPick } from "../common/util";
 import { views, notifications } from "../common/constants";
 
 export function loginTest(clusterUrl: string) {
@@ -41,13 +41,12 @@ export function loginTest(clusterUrl: string) {
             await driver.wait(until.elementLocated(By.className('quick-input-widget')), 10000);
             await credentialsLogin(clusterUrl, username, password);
 
-            // Wait until ODO download completes and download OKD client
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
-            // Save the credentials the first time around
+            // Don't save the credentials
             try {
                 const saveNotification = await driver.wait(() => { return notificationExists(notifications.SAVE_LOGIN); }, 5000);
-                await saveNotification.takeAction('Yes');
+                await saveNotification.takeAction('No');
             } catch (err) {
                 console.log('Credentials already saved');
             }
@@ -58,13 +57,13 @@ export function loginTest(clusterUrl: string) {
             expect(item).not.undefined;
         });
 
-        it('Relogging in to the cluster works with saved credentials', async function() {
+        it('Relogging in to the cluster works', async function() {
             this.timeout(120000);
             await driver.actions().mouseMove(explorer).perform();
             await explorer.getAction(views.LOGIN).click();
             await confirmLogout(driver);
 
-            await credentialsLogin(clusterUrl);
+            await credentialsLogin(clusterUrl, username, password);
             await driver.wait(() => { return viewHasNoProgress(view); }, 90000);
 
             // Check that the cluster node is present in the tree view
