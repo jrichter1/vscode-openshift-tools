@@ -199,7 +199,7 @@ export function componentTest(clusterUrl: string) {
         });
 
         it('Push works from context menu', async function() {
-            this.timeout(30000);
+            this.timeout(130000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
             await menu.select(menus.PUSH);
@@ -209,7 +209,7 @@ export function componentTest(clusterUrl: string) {
         });
 
         it('Push works from command palette', async function() {
-            this.timeout(30000);
+            this.timeout(130000);
             await new Workbench().executeCommand('openshift push component');
             await selectApplication(projectName, appName);
             await quickPick(localComponentName);

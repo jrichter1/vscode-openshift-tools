@@ -27,6 +27,7 @@ export async function viewHasNoProgress(view: SideBarView) {
 }
 
 export async function terminalHasNoChanges(view: TerminalView, timePeriod: number) {
+    await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
     const startText = await view.getText();
     await view.getDriver().sleep(timePeriod);
     const endText = await view.getText();
@@ -36,9 +37,10 @@ export async function terminalHasNoChanges(view: TerminalView, timePeriod: numbe
     return null;
 }
 
-export async function terminalHasText(view: TerminalView, text: string, timePeriod: number = 1000) {
+export async function terminalHasText(view: TerminalView, text: string, timePeriod: number = 2000) {
+    await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
     const currentText = await view.getText();
-    if (text === currentText) {
+    if (currentText.indexOf(text) > -1) {
         return text;
     } else {
         await view.getDriver().sleep(timePeriod);
