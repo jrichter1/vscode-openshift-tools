@@ -317,6 +317,7 @@ async function verifyComponent(name: string, application: ViewItem, initItems: V
 }
 
 async function waitForPush(name: string, timeout: number) {
+    await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
     const view = new TerminalView();
     await view.getDriver().wait(() => { return terminalHasText(view, `Changes successfully pushed to component: ${name}`); }, timeout);
 }
