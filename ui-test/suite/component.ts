@@ -1,6 +1,6 @@
-import { ViewItem, ViewSection, WebDriver, VSBrowser, InputBox, Workbench, DialogHandler, ActivityBar } from "vscode-extension-tester";
+import { ViewItem, ViewSection, WebDriver, VSBrowser, InputBox, Workbench, DialogHandler, ActivityBar, TerminalView } from "vscode-extension-tester";
 import { createProject, createApplication, deleteProject, quickPick, setInputTextAndConfirm, setInputTextAndCheck, checkTerminalText, verifyNodeDeletion, selectApplication, findNotification, validateName } from "../common/util";
-import { nodeHasNewChildren, notificationExists, inputHasQuickPicks } from "../common/conditions";
+import { nodeHasNewChildren, notificationExists, inputHasQuickPicks, terminalHasText } from "../common/conditions";
 import * as path from 'path';
 import { expect } from 'chai';
 import { validation, GIT_REPO, views, ItemType, notifications, odoCommands, menus } from "../common/constants";
@@ -53,7 +53,7 @@ export function componentTest(clusterUrl: string) {
         });
 
         it('New component can be created from Git Repository', async function() {
-            this.timeout(60000);
+            this.timeout(160000);
             const initItems = await application.getChildren();
             await new Workbench().executeCommand('openshift new component from git repository');
 
@@ -75,7 +75,7 @@ export function componentTest(clusterUrl: string) {
         });
 
         it('New component can be created from a workspace folder', async function() {
-            this.timeout(60000);
+            this.timeout(160000);
             const initItems = await application.getChildren();
             await new Workbench().executeCommand('openshift new component from local folder');
 
@@ -101,7 +101,7 @@ export function componentTest(clusterUrl: string) {
             await dialog.confirm();
 
             await createComponent(binaryComponentName, 'wildfly');
-            await verifyComponent(binaryComponentName, application, initItems);
+            await verifyComponent(binaryComponentName, application, initItems, false);
         });
 
         it('Duplicate component name is not allowed', async function() {
@@ -242,7 +242,7 @@ export function componentTest(clusterUrl: string) {
         });
 
         it('Linking components works from context menu', async function() {
-            this.timeout(60000);
+            this.timeout(90000);
             const component = await application.findChildItem(gitComponentName);
             const menu = await component.openContextMenu();
             await menu.select(menus.link(ItemType.component));
@@ -253,11 +253,11 @@ export function componentTest(clusterUrl: string) {
 
             await driver.wait(() => {
                 return notificationExists(notifications.itemsLinked(binaryComponentName, ItemType.component, gitComponentName));
-            }, 50000);
+            }, 80000);
         });
 
         it('Linking components works from command palette', async function() {
-            this.timeout(60000);
+            this.timeout(90000);
             new Workbench().executeCommand('openshift link component');
             await selectApplication(projectName, appName);
             await quickPick(gitComponentName, true);
@@ -265,7 +265,7 @@ export function componentTest(clusterUrl: string) {
 
             await driver.wait(() => {
                 return notificationExists(notifications.itemsLinked(localComponentName, ItemType.component, gitComponentName));
-            }, 50000);
+            }, 80000);
         });
 
         it('Component can be deleted from context menu', async function() {
@@ -301,11 +301,17 @@ async function createComponent(name: string, type: string, typeVersion: string =
     await quickPick(typeVersion);
 }
 
-async function verifyComponent(name: string, application: ViewItem, initItems: ViewItem[]) {
-    const components = (await application.getDriver().wait(() => { return nodeHasNewChildren(application, initItems); }, 40000)).map((item) => {
+async function verifyComponent(name: string, application: ViewItem, initItems: ViewItem[], waitForPush: boolean = true) {
+    const driver = await application.getDriver();
+    const components = (await driver.wait(() => { return nodeHasNewChildren(application, initItems); }, 40000)).map((item) => {
         return item.getLabel();
     });
     expect(components).contains(name);
     const notification = await findNotification(notifications.itemCreated(ItemType.component, name));
     expect(notification).not.undefined;
+
+    if (waitForPush) {
+        const view = new TerminalView();
+        await driver.wait(() => { return terminalHasText(view, `Changes successfully pushed to component: ${name}`); }, 120000);
+    }
 }

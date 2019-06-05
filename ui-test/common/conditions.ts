@@ -36,6 +36,16 @@ export async function terminalHasNoChanges(view: TerminalView, timePeriod: numbe
     return null;
 }
 
+export async function terminalHasText(view: TerminalView, text: string, timePeriod: number = 1000) {
+    const currentText = await view.getText();
+    if (text === currentText) {
+        return text;
+    } else {
+        await view.getDriver().sleep(timePeriod);
+        return null;
+    }
+}
+
 export async function inputHasError(input: InputBox) {
     if (await input.hasError()) {
         return await input.getMessage();

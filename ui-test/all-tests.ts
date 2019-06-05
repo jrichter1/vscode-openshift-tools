@@ -67,10 +67,10 @@ describe('System tests', () => {
     });
 
     login.loginTest(clusterUrl);
-    // cluster.clusterTest(clusterUrl);
-    // project.projectTest(clusterUrl);
-    // application.applicationTest(clusterUrl);
-    // component.componentTest(clusterUrl);
+    cluster.clusterTest(clusterUrl);
+    project.projectTest(clusterUrl);
+    application.applicationTest(clusterUrl);
+    component.componentTest(clusterUrl);
     // service.serviceTest(clusterUrl);
     // storage.storageTest(clusterUrl);
     // url.urlTest(clusterUrl);
