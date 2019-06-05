@@ -205,6 +205,7 @@ export function componentTest(clusterUrl: string) {
             await menu.select(menus.PUSH);
 
             await checkTerminalText(odoCommands.pushComponent(projectName, appName, gitComponentName), 20000);
+            await waitForPush(gitComponentName, 120000);
         });
 
         it('Push works from command palette', async function() {
@@ -214,6 +215,7 @@ export function componentTest(clusterUrl: string) {
             await quickPick(localComponentName);
 
             await checkTerminalText(odoCommands.pushComponent(projectName, appName, localComponentName), 20000);
+            await waitForPush(localComponentName, 120000);
         });
 
         it('Open in Browser is available from context menu', async function() {
@@ -301,17 +303,20 @@ async function createComponent(name: string, type: string, typeVersion: string =
     await quickPick(typeVersion);
 }
 
-async function verifyComponent(name: string, application: ViewItem, initItems: ViewItem[], waitForPush: boolean = true) {
-    const driver = await application.getDriver();
-    const components = (await driver.wait(() => { return nodeHasNewChildren(application, initItems); }, 40000)).map((item) => {
+async function verifyComponent(name: string, application: ViewItem, initItems: ViewItem[], wait: boolean = true) {
+    const components = (await application.getDriver().wait(() => { return nodeHasNewChildren(application, initItems); }, 40000)).map((item) => {
         return item.getLabel();
     });
     expect(components).contains(name);
     const notification = await findNotification(notifications.itemCreated(ItemType.component, name));
     expect(notification).not.undefined;
 
-    if (waitForPush) {
-        const view = new TerminalView();
-        await driver.wait(() => { return terminalHasText(view, `Changes successfully pushed to component: ${name}`); }, 120000);
+    if (wait) {
+        await waitForPush(name, 120000);
     }
+}
+
+async function waitForPush(name: string, timeout: number) {
+    const view = new TerminalView();
+    await view.getDriver().wait(() => { return terminalHasText(view, `Changes successfully pushed to component: ${name}`); }, timeout);
 }
