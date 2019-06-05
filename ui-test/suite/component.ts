@@ -205,7 +205,7 @@ export function componentTest(clusterUrl: string) {
             await menu.select(menus.PUSH);
 
             await checkTerminalText(odoCommands.pushComponent(projectName, appName, gitComponentName), 20000);
-            await waitForPush(gitComponentName, 120000);
+            await waitForPush(gitComponentName, 120000, true);
         });
 
         it('Push works from command palette', async function() {
@@ -312,12 +312,16 @@ async function verifyComponent(name: string, application: ViewItem, initItems: V
     expect(notification).not.undefined;
 
     if (wait) {
-        await waitForPush(name, 120000);
+        await waitForPush(name, 120000, name.indexOf('git') > -1);
     }
 }
 
-async function waitForPush(name: string, timeout: number) {
+async function waitForPush(name: string, timeout: number, isGit: boolean = false) {
     await (await new Workbench().openNotificationsCenter()).clearAllNotifications();
     const view = new TerminalView();
-    await view.getDriver().wait(() => { return terminalHasText(view, `Changes successfully pushed to component: ${name}`); }, timeout);
+    let message = `Changes successfully pushed to component: ${name}`;
+    if (isGit) {
+        message = `Component '${name}' is now set as active component`;
+    }
+    await view.getDriver().wait(() => { return terminalHasText(view, message); }, timeout);
 }
