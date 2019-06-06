@@ -72,8 +72,8 @@ describe('System tests', () => {
     application.applicationTest(clusterUrl);
     component.componentTest(clusterUrl);
     // service.serviceTest(clusterUrl);
-    // storage.storageTest(clusterUrl);
-    // url.urlTest(clusterUrl);
+    storage.storageTest(clusterUrl);
+    url.urlTest(clusterUrl);
 });
 
 async function openFolder(path: string) {
