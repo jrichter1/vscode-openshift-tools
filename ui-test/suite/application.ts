@@ -23,7 +23,7 @@ export function applicationTest(clusterUrl: string) {
         });
 
         after(async function() {
-            this.timeout(30000);
+            this.timeout(60000);
             await deleteProject(projectName, clusterNode);
             await deleteProject(projectName1, clusterNode);
         });
