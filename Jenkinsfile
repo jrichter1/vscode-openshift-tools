@@ -14,6 +14,7 @@ node('rhel7'){
 	}
 
 	stage('Build') {
+		sh "rm -f package-lock.json"
 		sh "npm install"
 		sh "npm run vscode:prepublish"
 	}
